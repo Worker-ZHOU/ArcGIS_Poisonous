@@ -1,16 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-
 using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.Geodatabase;
 using ArcGIS_Poisonous.Tools;
-using System.Diagnostics;
 
 
 namespace ArcGIS_Poisonous.FormChapter05
@@ -21,6 +14,7 @@ namespace ArcGIS_Poisonous.FormChapter05
     /// 1.唯一值符号化
     /// 2.TextElement标注
     /// 3.Annotation注记
+    /// 4.比例符号化
     /// </summary>
     public partial class FormCurrency : Form
     {
@@ -118,7 +112,7 @@ namespace ArcGIS_Poisonous.FormChapter05
         /// </summary>
         /// <param name="featureClassName">要素名称</param>
         /// <returns>要素名称对应的要素</returns>
-        private IFeatureClass GetFeatureClassByName(string featureClassName)
+        protected IFeatureClass GetFeatureClassByName(string featureClassName)
         {
             IFeatureClass featureClass = null;
 
@@ -138,7 +132,7 @@ namespace ArcGIS_Poisonous.FormChapter05
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnOK_Click(object sender, EventArgs e)
+        protected virtual void btnOK_Click(object sender, EventArgs e)
         {
             if (!SelectCheck())
             {

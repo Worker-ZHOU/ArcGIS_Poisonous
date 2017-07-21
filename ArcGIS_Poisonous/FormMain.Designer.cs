@@ -93,9 +93,14 @@
             this.txtAnnotation = new System.Windows.Forms.ToolStripMenuItem();
             this.txtmapTips = new System.Windows.Forms.ToolStripMenuItem();
             this.类别符号化ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SingleSymbol = new System.Windows.Forms.ToolStripMenuItem();
             this.UniqueValue = new System.Windows.Forms.ToolStripMenuItem();
             this.UniqueValuesManyFileds = new System.Windows.Forms.ToolStripMenuItem();
-            this.SingleSymbol = new System.Windows.Forms.ToolStripMenuItem();
+            this.定量符号化ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.GraduatedColor = new System.Windows.Forms.ToolStripMenuItem();
+            this.Graduatedsymbol = new System.Windows.Forms.ToolStripMenuItem();
+            this.Proportionalsymbol = new System.Windows.Forms.ToolStripMenuItem();
+            this.Dotdensitys = new System.Windows.Forms.ToolStripMenuItem();
             this.StatusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.SplitContainer = new System.Windows.Forms.SplitContainer();
@@ -531,7 +536,8 @@
             this.面状要素符号化ToolStripMenuItem,
             this.文本符号化ToolStripMenuItem,
             this.标注ToolStripMenuItem,
-            this.类别符号化ToolStripMenuItem});
+            this.类别符号化ToolStripMenuItem,
+            this.定量符号化ToolStripMenuItem});
             this.chapter05ToolStripMenuItem.Name = "chapter05ToolStripMenuItem";
             this.chapter05ToolStripMenuItem.Size = new System.Drawing.Size(80, 21);
             this.chapter05ToolStripMenuItem.Text = "Chapter05";
@@ -644,26 +650,65 @@
             this.类别符号化ToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
             this.类别符号化ToolStripMenuItem.Text = "类别符号化";
             // 
+            // SingleSymbol
+            // 
+            this.SingleSymbol.Name = "SingleSymbol";
+            this.SingleSymbol.Size = new System.Drawing.Size(148, 22);
+            this.SingleSymbol.Text = "单一符号化";
+            this.SingleSymbol.Click += new System.EventHandler(this.SingleSymbol_Click);
+            // 
             // UniqueValue
             // 
             this.UniqueValue.Name = "UniqueValue";
-            this.UniqueValue.Size = new System.Drawing.Size(152, 22);
+            this.UniqueValue.Size = new System.Drawing.Size(148, 22);
             this.UniqueValue.Text = "唯一值符号化";
             this.UniqueValue.Click += new System.EventHandler(this.UniqueValue_Click);
             // 
             // UniqueValuesManyFileds
             // 
             this.UniqueValuesManyFileds.Name = "UniqueValuesManyFileds";
-            this.UniqueValuesManyFileds.Size = new System.Drawing.Size(152, 22);
+            this.UniqueValuesManyFileds.Size = new System.Drawing.Size(148, 22);
             this.UniqueValuesManyFileds.Text = "唯一值多字段";
             this.UniqueValuesManyFileds.Click += new System.EventHandler(this.UniqueValuesManyFileds_Click);
             // 
-            // SingleSymbol
+            // 定量符号化ToolStripMenuItem
             // 
-            this.SingleSymbol.Name = "SingleSymbol";
-            this.SingleSymbol.Size = new System.Drawing.Size(152, 22);
-            this.SingleSymbol.Text = "单一符号化";
-            this.SingleSymbol.Click += new System.EventHandler(this.SingleSymbol_Click);
+            this.定量符号化ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.GraduatedColor,
+            this.Graduatedsymbol,
+            this.Proportionalsymbol,
+            this.Dotdensitys});
+            this.定量符号化ToolStripMenuItem.Name = "定量符号化ToolStripMenuItem";
+            this.定量符号化ToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.定量符号化ToolStripMenuItem.Text = "定量符号化";
+            // 
+            // GraduatedColor
+            // 
+            this.GraduatedColor.Name = "GraduatedColor";
+            this.GraduatedColor.Size = new System.Drawing.Size(152, 22);
+            this.GraduatedColor.Text = "分级色彩";
+            this.GraduatedColor.Click += new System.EventHandler(this.GraduatedColor_Click);
+            // 
+            // Graduatedsymbol
+            // 
+            this.Graduatedsymbol.Name = "Graduatedsymbol";
+            this.Graduatedsymbol.Size = new System.Drawing.Size(152, 22);
+            this.Graduatedsymbol.Text = "分级符号化";
+            this.Graduatedsymbol.Click += new System.EventHandler(this.Graduatedsymbol_Click);
+            // 
+            // Proportionalsymbol
+            // 
+            this.Proportionalsymbol.Name = "Proportionalsymbol";
+            this.Proportionalsymbol.Size = new System.Drawing.Size(152, 22);
+            this.Proportionalsymbol.Text = "比例符号化";
+            this.Proportionalsymbol.Click += new System.EventHandler(this.Proportionalsymbol_Click);
+            // 
+            // Dotdensitys
+            // 
+            this.Dotdensitys.Name = "Dotdensitys";
+            this.Dotdensitys.Size = new System.Drawing.Size(152, 22);
+            this.Dotdensitys.Text = "点密度符号化";
+            this.Dotdensitys.Click += new System.EventHandler(this.Dotdensitys_Click);
             // 
             // StatusStrip
             // 
@@ -1001,6 +1046,11 @@
         private System.Windows.Forms.ToolStripMenuItem UniqueValue;
         private System.Windows.Forms.ToolStripMenuItem UniqueValuesManyFileds;
         private System.Windows.Forms.ToolStripMenuItem SingleSymbol;
+        private System.Windows.Forms.ToolStripMenuItem 定量符号化ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem GraduatedColor;
+        private System.Windows.Forms.ToolStripMenuItem Graduatedsymbol;
+        private System.Windows.Forms.ToolStripMenuItem Proportionalsymbol;
+        private System.Windows.Forms.ToolStripMenuItem Dotdensitys;
     }
 }
 

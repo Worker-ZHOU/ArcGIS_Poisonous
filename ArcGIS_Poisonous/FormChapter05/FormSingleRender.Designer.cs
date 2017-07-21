@@ -1,6 +1,6 @@
 ﻿namespace ArcGIS_Poisonous.FormChapter05
 {
-    partial class Form1
+    partial class FormSingleRender
     {
         /// <summary>
         /// Required designer variable.

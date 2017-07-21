@@ -118,7 +118,7 @@
 
         private System.Windows.Forms.Label labelControl1;
         private System.Windows.Forms.Label labelControl2;
-        private System.Windows.Forms.ComboBox cmbSelectedLayer;
+        protected System.Windows.Forms.ComboBox cmbSelectedLayer;
         protected System.Windows.Forms.ComboBox cmbSelectedField;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancle;

@@ -13,6 +13,7 @@ using ESRI.ArcGIS.Geodatabase;
 using ArcGIS_Poisonous.Tools;
 
 using ArcGIS_Poisonous.FormChapter05;
+using ESRI.ArcGIS.esriSystem;
 
 namespace ArcGIS_Poisonous
 {
@@ -21,10 +22,30 @@ namespace ArcGIS_Poisonous
     /// </summary>
     public partial class ArcGisPoisonous : Form
     {
+
+        #region 定义变量
+
+        /// <summary>
+        /// 单一符号化窗口
+        /// </summary>
+        private FormSingleRender mFormSingleRender;
+
+        /// <summary>
+        /// 唯一值多段符号化窗口
+        /// </summary>
+        private FormUniqueManyValueRenderer mFormUniqueManyValueRenderer;
+
         /// <summary>
         /// 通用窗口1：选择图层与选择图层字段
         /// </summary>
         private FormCurrency mFormCurrency;
+
+        /// <summary>
+        /// 通用窗口2：
+        /// </summary>
+        private FormCurrency2 mFormCurrency2;
+
+        #endregion
 
         #region 5.2 地图符号化
 
@@ -484,46 +505,44 @@ namespace ArcGIS_Poisonous
 
         #region 单一符号化
 
-        Form1 mFormCurrency2;
-
         private void SingleSymbol_Click(object sender, EventArgs e)
         {
-            if (mFormCurrency2 == null || mFormCurrency2.IsDisposed)
+            if (mFormSingleRender == null || mFormSingleRender.IsDisposed)
             {
-                mFormCurrency2 = new Form1();
-                mFormCurrency2.Rander += new Form1.EventHandle(FormCurrency_SingleSymbol);
+                mFormSingleRender = new FormSingleRender();
+                mFormSingleRender.Rander += new FormSingleRender.EventHandle(FormCurrency_SingleSymbol);
             }
-            mFormCurrency2.FormTitleText = "单一符号化";
-            mFormCurrency2.Map = MainMapControl.Map;
-            mFormCurrency2.InitUI();
-            mFormCurrency2.Show();
+            mFormSingleRender.FormTitleText = "单一符号化";
+            mFormSingleRender.Map = MainMapControl.Map;
+            mFormSingleRender.InitUI();
+            mFormSingleRender.Show();
         }
 
-        private void FormCurrency_SingleSymbol(string featureClassName, string fieldName) {
+        private void FormCurrency_SingleSymbol(string featureClassName, IRgbColor fieldName) {
             IFeatureLayer featureLayer = MapOperation.GetFeatureLayerByName(MainMapControl.Map, featureClassName);
             SingleSymbolRender(featureLayer, fieldName);
         }
 
-        private void SingleSymbolRender(IFeatureLayer featureLayer, string fieldName)
+        private void SingleSymbolRender(IFeatureLayer featureLayer, IRgbColor rgbColor)
         {
             esriGeometryType types = featureLayer.FeatureClass.ShapeType;
             ISimpleRenderer pSimRender = new SimpleRendererClass();
             if (types == esriGeometryType.esriGeometryPolygon)
             {
                 ISimpleFillSymbol pSimFillSym = new SimpleFillSymbolClass();
-               // pSimFillSym.Color = pRgbColor;
+                pSimFillSym.Color = rgbColor;
                 pSimRender.Symbol = pSimFillSym as ISymbol; // 设置渲染的样式 
             }
             else if (types == esriGeometryType.esriGeometryPoint)
             {
                 ISimpleMarkerSymbol pSimpleMarkerSymbol = new SimpleMarkerSymbolClass();
-                //pSimpleMarkerSymbol.Color = pRgbColor;
+                pSimpleMarkerSymbol.Color = rgbColor;
                 pSimRender.Symbol = pSimpleMarkerSymbol as ISymbol;
             }
             else if (types == esriGeometryType.esriGeometryPolyline)
             {
                 ISimpleLineSymbol pSimpleLineSymbol = new SimpleLineSymbolClass();
-                //pSimpleLineSymbol.Color = pRgbColor;
+                pSimpleLineSymbol.Color = rgbColor;
                 pSimRender.Symbol = pSimpleLineSymbol as ISymbol;
             }
             IGeoFeatureLayer pGeoFeatLyr = featureLayer as IGeoFeatureLayer;
@@ -533,7 +552,6 @@ namespace ArcGIS_Poisonous
         }
 
         #endregion
-
 
         #region 5.4.2 唯一值符号化
 
@@ -652,6 +670,424 @@ namespace ArcGIS_Poisonous
         #region 5.4.3 唯一值多段符号化
 
         private void UniqueValuesManyFileds_Click(object sender, EventArgs e)
+        {
+            if (mFormUniqueManyValueRenderer == null || mFormUniqueManyValueRenderer.IsDisposed)
+            {
+                mFormUniqueManyValueRenderer = new FormUniqueManyValueRenderer();
+                mFormUniqueManyValueRenderer.Render += new FormUniqueManyValueRenderer.EventHandler(FormUniqueManyValueRenderer_UniqueValuesManyFileds);
+            }
+            mFormUniqueManyValueRenderer.Map = MainMapControl.Map;
+            mFormUniqueManyValueRenderer.InitUI();
+            mFormUniqueManyValueRenderer.Show();
+        }
+
+        private void FormUniqueManyValueRenderer_UniqueValuesManyFileds(string featureClassName, string[] fieldNames)
+        {
+            IFeatureLayer featureLayer = MapOperation.GetFeatureLayerByName(MainMapControl.Map, featureClassName);
+            UniqueValueMany_fieldsRenderer(featureLayer, fieldNames);
+        }
+
+        private void UniqueValueMany_fieldsRenderer(IFeatureLayer featureLayer, string[] fieldNames)
+        {
+            IUniqueValueRenderer uniqueValueRenderer;
+            IColor nextUniqueColor;
+            IEnumColors enumRamp;
+            ITable table;
+            IRow nextRow;
+            ICursor cursor;
+            IQueryFilter queryFilter;
+            IRandomColorRamp randomColorRamp = new RandomColorRampClass();
+            randomColorRamp.StartHue = 0;
+            randomColorRamp.MinValue = 0;
+            randomColorRamp.MinSaturation = 15;
+            randomColorRamp.EndHue = 360;
+            randomColorRamp.MaxValue = 100;
+            randomColorRamp.MinSaturation = 30;
+            // 根据渲染字段值的个数，设置一组随机颜色，如某一字段有5个不同值，则创建5个随机颜色与之匹配
+            IQueryFilter queryFilter2 = new QueryFilterClass();
+            randomColorRamp.Size = featureLayer.FeatureClass.FeatureCount(queryFilter2);
+            bool success = false;
+            randomColorRamp.CreateRamp(out success);
+            // 所选字段为两个时
+            if (fieldNames.Length == 2)
+            {
+                string fieldName1 = fieldNames[0];
+                string fieldName2 = fieldNames[1];
+                IGeoFeatureLayer geoFeatureLayer = featureLayer as IGeoFeatureLayer;
+                uniqueValueRenderer = new UniqueValueRendererClass();
+                table = geoFeatureLayer as ITable;
+                int fieldNumber = table.FindField(fieldName1);
+                int fieldNumber2 = table.FindField(fieldName2);
+
+                // 设置渲染字段的个数
+                uniqueValueRenderer.FieldCount = 2;
+                // 设置渲染的第一个字段
+                uniqueValueRenderer.set_Field(0, fieldName1);
+                // 设置渲染的第二个字段
+                uniqueValueRenderer.set_Field(1, fieldName2);
+
+                enumRamp = randomColorRamp.Colors;
+                nextUniqueColor = null;
+                // 获取渲染字段的每个属性值
+                queryFilter = new QueryFilterClass();
+                queryFilter.AddField(fieldName1);
+                queryFilter.AddField(fieldName2);
+                cursor = table.Search(queryFilter, true);
+                nextRow = cursor.NextRow();
+                // 这里的codeValue可以定位成object类型
+                string codeValue;
+                while (nextRow != null)
+                {
+                    codeValue = nextRow.get_Value(fieldNumber).ToString() + uniqueValueRenderer.FieldDelimiter + nextRow.get_Value(fieldNumber2).ToString();
+                    nextUniqueColor = enumRamp.Next();
+                    if (nextUniqueColor == null)
+                    {
+                        enumRamp.Reset();
+                        nextUniqueColor = enumRamp.Next();
+                    }
+                    IFillSymbol fillSymbol;
+                    ILineSymbol lineSymbol;
+                    IMarkerSymbol markerSymbol;
+                    switch (geoFeatureLayer.FeatureClass.ShapeType)
+                    {     
+                        case esriGeometryType.esriGeometryPoint:
+                            markerSymbol = new SimpleMarkerSymbolClass();
+                            markerSymbol.Color = nextUniqueColor;
+                            uniqueValueRenderer.AddValue(codeValue, fieldName1 + " " + fieldName2, markerSymbol as ISymbol);
+                            break;
+                       
+                        case esriGeometryType.esriGeometryPolyline:
+                            lineSymbol = new SimpleLineSymbolClass();
+                            lineSymbol.Color = nextUniqueColor;
+                            uniqueValueRenderer.AddValue(codeValue, fieldName1 + " " + fieldName2, lineSymbol as ISymbol);
+                            break;
+                 
+                        case esriGeometryType.esriGeometryPolygon:
+                            fillSymbol = new SimpleFillSymbolClass();
+                            fillSymbol.Color = nextUniqueColor;
+                            // 渲染字段组合值对应的符号
+                            uniqueValueRenderer.AddValue(codeValue, fieldName1 + " " + fieldName2, fillSymbol as ISymbol);
+                            break;
+
+                        default:
+                            break;
+                    }
+                    nextRow = cursor.NextRow();
+                }
+                geoFeatureLayer.Renderer = uniqueValueRenderer as IFeatureRenderer;
+                MainMapControl.Refresh();
+                MainMapControl.Update();
+                TOCControl.Update();
+            }
+
+        }
+
+
+
+
+        #endregion
+
+        #region 5.4.4 分级色彩符号化
+
+        private void GraduatedColor_Click(object sender, EventArgs e)
+        {
+            if (mFormCurrency2 == null || mFormCurrency2.IsDisposed)
+            {
+                mFormCurrency2 = new FormCurrency2();
+                mFormCurrency2.Render += new FormCurrency2.EventHandler(FormCurrency2_GraduatedColor);
+            }
+            mFormCurrency2.Map = MainMapControl.Map;
+            mFormCurrency2.FormTitleText = "分级颜色";
+            mFormCurrency2.Show();
+        }
+
+        private void FormCurrency2_GraduatedColor(String featureClassName, String fieldName, int intNumClass) {
+            IFeatureLayer featureLayer = MapOperation.GetFeatureLayerByName(MainMapControl.Map, featureClassName);
+            GraduatedColors(featureLayer, fieldName, intNumClass);
+        }
+
+        private void GraduatedColors(IFeatureLayer featureLayer, string fieldName, int intNumClass)
+        {
+            IGeoFeatureLayer geoFeatureLayer = featureLayer as IGeoFeatureLayer;
+            object dataFrequency;
+            object dataValues;
+            bool ok;
+            int breakIndex;
+            ITable table = geoFeatureLayer.FeatureClass as ITable;
+            ITableHistogram tableHistogram = new BasicTableHistogramClass();
+            IBasicHistogram basicHistogram = tableHistogram as IBasicHistogram;
+            tableHistogram.Field = fieldName;
+            tableHistogram.Table = table;
+            // 获取渲染字段的值及其出现的频率
+            basicHistogram.GetHistogram(out dataValues, out dataFrequency);
+            IClassifyGEN classify = new EqualIntervalClass();
+            try
+            {
+                // 根据获取字段的值和出现的频率对其进行等级划分
+                classify.Classify(dataValues, dataFrequency, ref intNumClass);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            // 返回一个数组
+            double[] classes = classify.ClassBreaks as double[];
+            int classesCount = classes.GetUpperBound(0);
+            IClassBreaksRenderer classBreaksRenderer = new ClassBreaksRendererClass();
+            // 设置分级字段
+            classBreaksRenderer.Field = fieldName;
+            // 设置分级数目
+            classBreaksRenderer.BreakCount = classesCount;
+            // 分级后的图例是否按升级顺序排序
+            classBreaksRenderer.SortClassesAscending = true;
+            // 设置分级着色所需色带的起止颜色
+            IHsvColor fromColor = new HsvColorClass();
+            // 黄色
+            fromColor.Hue = 0;
+            fromColor.Saturation = 50;
+            fromColor.Value = 96;
+            IHsvColor toColor = new HsvColorClass();
+            toColor.Hue = 80;
+            toColor.Saturation = 100;
+            toColor.Value = 96;
+            // 产生颜色带对象
+            IAlgorithmicColorRamp algorithmicColorRamp = new AlgorithmicColorRampClass();
+            algorithmicColorRamp.Algorithm = esriColorRampAlgorithm.esriHSVAlgorithm;
+            algorithmicColorRamp.FromColor = fromColor;
+            algorithmicColorRamp.ToColor = toColor;
+            algorithmicColorRamp.Size = classesCount;
+            algorithmicColorRamp.CreateRamp(out ok);
+            // 获得颜色
+            IEnumColors enumColors = algorithmicColorRamp.Colors;
+            // 需注意的是分级着色对象中Symbol和break的下标都是从0开始
+            for (breakIndex = 0; breakIndex < classesCount ; breakIndex++)
+            {
+                IColor color = enumColors.Next();
+                switch (geoFeatureLayer.FeatureClass.ShapeType)
+                {
+                   
+                    case esriGeometryType.esriGeometryPoint:
+                        ISimpleMarkerSymbol simpleMarkerSymbol = new SimpleMarkerSymbolClass();
+                        simpleMarkerSymbol.Color = color;
+                        // 设置填充符号
+                        classBreaksRenderer.set_Symbol(breakIndex, simpleMarkerSymbol as ISymbol);
+                        // 设定每一分级的分级断点
+                        classBreaksRenderer.set_Break(breakIndex, classes[breakIndex + 1]);
+                        break;
+
+                    case esriGeometryType.esriGeometryPolyline:
+                        ISimpleLineSymbol simpleLineSymbol = new SimpleLineSymbolClass();
+                        simpleLineSymbol.Color = color;
+                        // 设置填充符号
+                        classBreaksRenderer.set_Symbol(breakIndex, simpleLineSymbol as ISymbol);
+                        // 设定每一分级的分级断点
+                        classBreaksRenderer.set_Break(breakIndex, classes[breakIndex + 1]);
+                        break;
+                    
+                    case esriGeometryType.esriGeometryPolygon:
+                        ISimpleFillSymbol simpleFileSymbol = new SimpleFillSymbolClass();
+                        simpleFileSymbol.Color = color;
+                        simpleFileSymbol.Style = esriSimpleFillStyle.esriSFSSolid;
+                        // 设置填充符号
+                        classBreaksRenderer.set_Symbol(breakIndex, simpleFileSymbol as ISymbol);
+                        // 设定每一分级的分级断点
+                        classBreaksRenderer.set_Break(breakIndex, classes[breakIndex + 1]);
+                        break;
+                   
+                    default:
+                        break;
+                }
+            }
+            geoFeatureLayer.Renderer = classBreaksRenderer as IFeatureRenderer;
+            MainMapControl.Refresh();
+            TOCControl.Update();
+        }
+
+        #endregion
+
+        #region 5.4.5 分级符号化
+
+        private void Graduatedsymbol_Click(object sender, EventArgs e)
+        {
+            if (mFormCurrency2 == null || mFormCurrency2.IsDisposed)
+            {
+                mFormCurrency2 = new FormCurrency2();
+                mFormCurrency2.Render += new FormCurrency2.EventHandler(FormCurrency_Graduatedsymbol);
+            }
+            mFormCurrency2.Map = MainMapControl.Map;
+            mFormCurrency2.FormTitleText = "分级符号化";
+            mFormCurrency2.Show();
+
+        }
+
+        private void FormCurrency_Graduatedsymbol(string featureClassName, string fieldName, int numClasses)
+        {
+            IFeatureLayer featureLayer = MapOperation.GetFeatureLayerByName(MainMapControl.Map, featureClassName);
+            GraduatedSymbols(featureLayer,fieldName,numClasses);
+        }
+
+        private void GraduatedSymbols(IFeatureLayer featureLayer, string fieldName, int numClasses)
+        {
+            ISimpleMarkerSymbol simpleMarkerSymbol = new SimpleMarkerSymbolClass();
+            simpleMarkerSymbol.Color = ColorTool.GetRgbColor(255, 100, 100);
+            ISimpleLineSymbol simpleLineSymbol = new SimpleLineSymbolClass();
+            simpleLineSymbol.Color = ColorTool.GetRgbColor(255, 100, 100);
+            int breakIndex;
+            object dataFrequency;
+            object dataValues;
+            // 获得要着色的图层
+            IGeoFeatureLayer geoFeatureLayer = featureLayer as IGeoFeatureLayer;
+            ITable table = geoFeatureLayer.FeatureClass as ITable;
+            ITableHistogram tableHistogram = new BasicTableHistogramClass();
+            IBasicHistogram basicHistogram = tableHistogram as IBasicHistogram;
+            tableHistogram.Field = fieldName;
+            tableHistogram.Table = table;
+            // 获取渲染字段的值及出现的频率
+            basicHistogram.GetHistogram(out dataValues, out dataFrequency);
+            IClassifyGEN classify = new EqualIntervalClass();
+            try
+            {
+                // 根据获取字段的值和出现的频率对其进行风机划分
+                classify.Classify(dataValues, dataFrequency, ref numClasses);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            // 返回一个数组
+            double[] classes = classify.ClassBreaks as double[];
+            int classesCount = classes.GetUpperBound(0);
+            IClassBreaksRenderer classBreakRenderer = new ClassBreaksRendererClass();
+            // 设置分级字段
+            classBreakRenderer.Field = fieldName;
+            // 设置着色对象的分组数目
+            classBreakRenderer.BreakCount = classesCount;
+            // 升序排序
+            classBreakRenderer.SortClassesAscending = true;
+            // 需要注意的时分级着色对象中的symbol和break的下标都是从0开始
+            double symbolSizeOrigin = 5.0;
+            if (classesCount <= 5)
+            {
+                symbolSizeOrigin = 8;
+            }
+            if (classesCount < 10 && classesCount > 5)
+            {
+                symbolSizeOrigin = 7;
+            }
+            IFillSymbol backgroundSymbol = new SimpleFillSymbolClass();
+            backgroundSymbol.Color = ColorTool.GetRgbColor(255, 255, 100);
+            //不同的要素类型，生成不同的分级符号
+            switch (geoFeatureLayer.FeatureClass.ShapeType)
+            {
+                case esriGeometryType.esriGeometryPolygon:
+                    {
+                        for (breakIndex = 0; breakIndex <= classesCount - 1; breakIndex++)
+                        {
+                            classBreakRenderer.set_Break(breakIndex, classes[breakIndex + 1]);
+                            classBreakRenderer.BackgroundSymbol = backgroundSymbol;
+                            simpleMarkerSymbol.Size = symbolSizeOrigin + breakIndex * symbolSizeOrigin / 3.0d;
+                            classBreakRenderer.set_Symbol(breakIndex, (ISymbol)simpleMarkerSymbol);
+                        }
+                        break;
+                    }
+                case esriGeometryType.esriGeometryPolyline:
+                    {
+                        for (breakIndex = 0; breakIndex <= classesCount - 1; breakIndex++)
+                        {
+                            classBreakRenderer.set_Break(breakIndex, classes[breakIndex + 1]);
+                            simpleLineSymbol.Width = symbolSizeOrigin / 5 + breakIndex * (symbolSizeOrigin / 5) / 5.0d;
+                            classBreakRenderer.set_Symbol(breakIndex, (ISymbol)simpleLineSymbol);
+                        }
+                        break;
+                    }
+                case esriGeometryType.esriGeometryPoint:
+                    {
+                        for (breakIndex = 0; breakIndex <= classesCount - 1; breakIndex++)
+                        {
+                            classBreakRenderer.set_Break(breakIndex, classes[breakIndex + 1]);
+                            simpleMarkerSymbol.Size = symbolSizeOrigin + breakIndex * symbolSizeOrigin / 3.0d;
+                            classBreakRenderer.set_Symbol(breakIndex, (ISymbol)simpleMarkerSymbol);
+                        }
+                        break;
+                    }
+            }
+            geoFeatureLayer.Renderer = classBreakRenderer as IFeatureRenderer;
+            MainMapControl.ActiveView.Refresh();
+            TOCControl.Update();
+        }
+
+
+        #endregion
+
+        #region 比例符号化
+
+        private void Proportionalsymbol_Click(object sender, EventArgs e)
+        {
+            if (mFormCurrency == null || mFormCurrency.IsDisposed)
+            {
+                mFormCurrency = new FormCurrency();
+                mFormCurrency.Rander += new FormCurrency.EventHandle(FormCurrency_Proportionalsymbol);
+            }
+            mFormCurrency.Map = MainMapControl.Map;
+            mFormCurrency.FormTitleText = "比例符号化";
+            mFormCurrency.InitUI();
+            mFormCurrency.Show();
+        }
+
+        private void FormCurrency_Proportionalsymbol(string featureClassName, string fieldName) {
+            IFeatureLayer featureLayer = MapOperation.GetFeatureLayerByName(MainMapControl.Map, featureClassName);
+            Proportional(featureLayer, fieldName);
+        }
+
+        private void Proportional(IFeatureLayer featureLayer, string fieldName)
+        {
+            IGeoFeatureLayer geoFeatureLayer = featureLayer as IGeoFeatureLayer;
+            ITable table = featureLayer as ITable;
+            ICursor cursor = table.Search(null, true);
+            // 利用IDataStatistics和IStatisticsResults获取渲染字段的统计值，最主要时获取最大值和最小值
+            IDataStatistics dataStatistics = new DataStatisticsClass();
+            dataStatistics.Cursor = cursor;
+            dataStatistics.Field = fieldName;
+            IStatisticsResults statisticsResults = dataStatistics.Statistics;
+            if (statisticsResults != null)
+            {
+                // 设置渲染背景色
+                IFillSymbol fillSymbol = new SimpleFillSymbolClass();
+                fillSymbol.Color = ColorTool.GetRgbColor(155, 255, 0);
+                // 设置比例符号的样式
+                ISimpleMarkerSymbol simpleMarkerSymbol = new SimpleMarkerSymbolClass();
+                simpleMarkerSymbol.Style = esriSimpleMarkerStyle.esriSMSDiamond;
+                simpleMarkerSymbol.Size = 3;
+                simpleMarkerSymbol.Color = ColorTool.GetRgbColor(255, 90, 0);
+                IProportionalSymbolRenderer proportionalSymbolRenderer = new ProportionalSymbolRendererClass();
+                // 设置渲染单位
+                proportionalSymbolRenderer.ValueUnit = esriUnits.esriUnknownUnits;
+                // 设置渲染字段
+                proportionalSymbolRenderer.Field = fieldName;
+                // 是否使用Flannery补偿
+                proportionalSymbolRenderer.FlanneryCompensation = false;
+                // 获取渲染字段的最小值
+                proportionalSymbolRenderer.MinDataValue = statisticsResults.Minimum;
+                // 获取渲染字段的最大值
+                proportionalSymbolRenderer.MaxDataValue = statisticsResults.Maximum;
+                proportionalSymbolRenderer.BackgroundSymbol = fillSymbol;
+                // 设置渲染字段最小值的渲染符号，其余值的符号根据此符号产生
+                proportionalSymbolRenderer.MinSymbol = simpleMarkerSymbol as ISymbol;
+                // 控制TOC控件中显示的数目
+                proportionalSymbolRenderer.LegendSymbolCount = 5;
+                // 生成例图
+                proportionalSymbolRenderer.CreateLegendSymbols();
+                geoFeatureLayer.Renderer = proportionalSymbolRenderer as IFeatureRenderer;
+            }
+            MainMapControl.Refresh();
+            TOCControl.Update();
+        }
+
+        #endregion
+
+        #region 点密度符号化
+
+        private void Dotdensitys_Click(object sender, EventArgs e)
         {
 
         }
