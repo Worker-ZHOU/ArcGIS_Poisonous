@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 using ESRI.ArcGIS.Carto;
@@ -14,6 +11,7 @@ using ArcGIS_Poisonous.Tools;
 
 using ArcGIS_Poisonous.FormChapter05;
 using ESRI.ArcGIS.esriSystem;
+using System.Collections.Generic;
 
 namespace ArcGIS_Poisonous
 {
@@ -44,6 +42,16 @@ namespace ArcGIS_Poisonous
         /// 通用窗口2：
         /// </summary>
         private FormCurrency2 mFormCurrency2;
+
+        /// <summary>
+        /// 通用窗口3
+        /// </summary>
+        private FormCurrency3 mFormCurrency3;
+
+        /// <summary>
+        /// 统计图表枚举类型
+        /// </summary>
+        private ChartEnumTpye mChartEnumTpye = ChartEnumTpye.UnKnow;
 
         #endregion
 
@@ -503,7 +511,7 @@ namespace ArcGIS_Poisonous
 
         #region 5.4 专题地图
 
-        #region 单一符号化
+        #region 5.4.1 单一符号化
 
         private void SingleSymbol_Click(object sender, EventArgs e)
         {
@@ -1019,7 +1027,7 @@ namespace ArcGIS_Poisonous
 
         #endregion
 
-        #region 比例符号化
+        #region 5.4.6 比例符号化
 
         private void Proportionalsymbol_Click(object sender, EventArgs e)
         {
@@ -1085,11 +1093,576 @@ namespace ArcGIS_Poisonous
 
         #endregion
 
-        #region 点密度符号化
+        #region 5.4.7 点密度符号化
 
         private void Dotdensitys_Click(object sender, EventArgs e)
         {
+            if (mFormCurrency2 == null || mFormCurrency2.IsDisposed)
+            {
+                mFormCurrency2 = new FormCurrency2();
+                mFormCurrency2.Render += new FormCurrency2.EventHandler(FormCurrency2_Dotdensitys);
+            }
+            mFormCurrency2.Map = MainMapControl.Map;
+            mFormCurrency2.FormTitleText = "点密度符号化";
+            mFormCurrency2.Show();
+        }
 
+        private void FormCurrency2_Dotdensitys(String featureClassName, String fieldName, int intNumClass) {
+            IFeatureLayer featureLayer = MapOperation.GetFeatureLayerByName(MainMapControl.Map,featureClassName);
+            _Dotdensitys(featureLayer, fieldName, intNumClass);
+        }
+
+        private void _Dotdensitys(IFeatureLayer featureLayer, string fieldName, int intNumClass)
+        {
+            IGeoFeatureLayer geoFeatureLayer = featureLayer as IGeoFeatureLayer;
+            IDotDensityRenderer dotDensityRenderer = new DotDensityRendererClass();
+            IRendererFields rendererFields = dotDensityRenderer as IRendererFields;
+            // 设置渲染字段
+            rendererFields.AddField(fieldName);
+            // 设置填充背景色
+            IDotDensityFillSymbol dotDensityFillSymbol = new DotDensityFillSymbolClass();
+            dotDensityFillSymbol.DotSize = 3;
+            dotDensityFillSymbol.BackgroundColor = ColorTool.GetRgbColor(0, 255, 0);
+            // 设置渲染符号
+            ISymbolArray symbolArray = dotDensityFillSymbol as ISymbolArray;
+            ISimpleMarkerSymbol simpleMarkSymbol = new SimpleMarkerSymbolClass();
+            simpleMarkSymbol.Style = esriSimpleMarkerStyle.esriSMSCircle;
+            simpleMarkSymbol.Color = ColorTool.GetRgbColor(0,0,255);
+            symbolArray.AddSymbol(simpleMarkSymbol as ISymbol);
+            dotDensityRenderer.DotDensitySymbol = dotDensityFillSymbol;
+            // 设置渲染密度，即每个点符号所代表的数值大小
+            dotDensityRenderer.DotValue = intNumClass*500;
+            // 创建图例
+            dotDensityRenderer.CreateLegend();
+            geoFeatureLayer.Renderer = dotDensityRenderer as IFeatureRenderer;
+
+            MainMapControl.Refresh();
+            TOCControl.Update();
+        }
+
+        #endregion
+
+        #region 5.4.8 统计图表符号化
+
+        private enum ChartEnumTpye:int
+        {
+            UnKnow = 0,
+            PieChart = 1,
+            BarChart = 2,
+            StackChart = 3
+        }
+
+        private void Pie_Click(object sender, EventArgs e)
+        {
+            mChartEnumTpye = ChartEnumTpye.PieChart;
+            if (mFormCurrency3 == null || mFormCurrency3.IsDisposed)
+            {
+                mFormCurrency3 = new FormCurrency3();
+                mFormCurrency3.Render += new FormCurrency3.EventHandler(FormCurrency3_ChartRender);
+            }
+            mFormCurrency3.Map = MainMapControl.Map;
+            mFormCurrency3.FormTitleText = "统计图表-饼分图";
+            mFormCurrency3.Show();
+        }
+
+        private void Bar_Click(object sender, EventArgs e)
+        {
+            mChartEnumTpye = ChartEnumTpye.BarChart;
+            if (mFormCurrency3 == null || mFormCurrency3.IsDisposed)
+            {
+                mFormCurrency3 = new FormCurrency3();
+                mFormCurrency3.Render += new FormCurrency3.EventHandler(FormCurrency3_ChartRender);
+            }
+            mFormCurrency3.Map = MainMapControl.Map;
+            mFormCurrency3.FormTitleText = "统计图表-条行图";
+            mFormCurrency3.Show();
+        }
+
+        private void Stacked_Click(object sender, EventArgs e)
+        {
+            
+                mChartEnumTpye = ChartEnumTpye.StackChart;
+            if (mFormCurrency3 == null || mFormCurrency3.IsDisposed)
+            {
+                mFormCurrency3 = new FormCurrency3();
+                mFormCurrency3.Render += new FormCurrency3.EventHandler(FormCurrency3_ChartRender);
+            }
+            mFormCurrency3.Map = MainMapControl.Map;
+            mFormCurrency3.FormTitleText = "统计图表-堆叠图";
+            mFormCurrency3.Show();
+
+        }
+         
+        private void FormCurrency3_ChartRender(string sFeatClsName, Dictionary<string, IRgbColor> _dicFieldAndColor)
+        {
+            IFeatureLayer pFeatLyr = MapOperation.GetFeatureLayerByName(MainMapControl.Map, sFeatClsName);
+            _ChartRenderer(pFeatLyr, _dicFieldAndColor);
+        }
+
+        private void _ChartRenderer(IFeatureLayer pFeatLyr, Dictionary<string, IRgbColor> _dicFieldAndColor)
+        {
+            IGeoFeatureLayer geoFeatureLayer = pFeatLyr as IGeoFeatureLayer;
+            IChartRenderer chartRenderer = new ChartRendererClass();
+            IRendererFields rendererFields = chartRenderer as IRendererFields;
+            IFeatureCursor featureCursor = null;
+            IDataStatistics dataStatistics = null;
+            double max = 0;
+            double temp = 0;
+            IQueryFilter queryFilter = new QueryFilterClass();
+            featureCursor = geoFeatureLayer.Search(queryFilter, true);
+
+            // 遍历出所选择的第一个字段的最大值，作为设置专题图比例大小的依据
+            foreach (KeyValuePair<string, IRgbColor> _keyValue in _dicFieldAndColor)
+            {
+                rendererFields.AddField(_keyValue.Key, _keyValue.Key);
+                dataStatistics = new DataStatisticsClass();
+                dataStatistics.Cursor = featureCursor as ICursor;
+                dataStatistics.Field = _keyValue.Key;
+                temp = dataStatistics.Statistics.Maximum;
+                if (temp >= max)
+                {
+                    max = temp;
+                }
+            }
+            IRgbColor rgbColor = null;
+            IChartSymbol chartSymbol = null;
+            IFillSymbol fillSymbol = null;
+            IMarkerSymbol markerSymbol = null;
+            IBarChartSymbol barChartSymbol = null;
+            IPieChartSymbol pieChartSymbol = null;
+            IStackedChartSymbol stackedChartSymbol = null;
+
+            // 定义并设置渲染样式
+            switch (mChartEnumTpye)
+            {
+                case ChartEnumTpye.PieChart:
+                    pieChartSymbol = new PieChartSymbolClass();
+                    // 说明饼图是否为顺时针方向
+                    pieChartSymbol.Clockwise = true;
+                    // 说明是否使用轮廓线
+                    pieChartSymbol.UseOutline = true;
+
+                    ILineSymbol lineSymbol = new SimpleLineSymbolClass();
+                    lineSymbol.Color = ColorTool.GetRgbColor(100, 255, 30) as IColor;
+                    lineSymbol.Width = 1;
+                    pieChartSymbol.Outline = lineSymbol;
+                    break;
+
+                case ChartEnumTpye.BarChart:
+                    barChartSymbol = new BarChartSymbolClass();
+                    // 设置每个条形的宽度
+                    barChartSymbol.Width = 6;
+
+                    break;
+
+                case ChartEnumTpye.StackChart:
+                    stackedChartSymbol = new StackedChartSymbolClass();
+                    // 设置每个堆叠图的宽度
+                    stackedChartSymbol.Width = 6;
+                    break;
+
+                default:
+                    break;
+            }
+
+            if (pieChartSymbol != null)
+            {
+                chartSymbol = pieChartSymbol as IChartSymbol;
+                markerSymbol = pieChartSymbol as IMarkerSymbol;
+                // 设置饼图的大小
+                markerSymbol.Size = 30;
+            }
+            else if (barChartSymbol != null)
+            {
+                chartSymbol = barChartSymbol as IChartSymbol;
+                markerSymbol = barChartSymbol as IMarkerSymbol;
+                // 设置条形图的高度
+                markerSymbol.Size = 30;
+            }
+            else if (stackedChartSymbol != null)
+            {
+                chartSymbol = stackedChartSymbol as IChartSymbol;
+                markerSymbol = stackedChartSymbol as IMarkerSymbol;
+                // 设置条形图的高度
+                markerSymbol.Size = 30;
+            }
+
+            chartSymbol.MaxValue = max;
+            ISymbolArray symbolArray = null;
+            if (barChartSymbol != null)
+            {
+                symbolArray = barChartSymbol as ISymbolArray;
+            }
+            else if (stackedChartSymbol != null)
+            {
+                symbolArray = stackedChartSymbol as ISymbolArray;
+            }
+            else if (pieChartSymbol != null)
+            {
+                symbolArray = pieChartSymbol as ISymbolArray;
+            }
+
+            foreach (KeyValuePair<string,IRgbColor> _keyValue in _dicFieldAndColor)
+            {
+                // 获取渲染字段的颜色值
+                rgbColor = _keyValue.Value;
+                fillSymbol = new SimpleFillSymbolClass();
+                fillSymbol.Color = rgbColor as IColor;
+                symbolArray.AddSymbol(fillSymbol as ISymbol);
+                if (barChartSymbol != null)
+                {
+                    chartRenderer.ChartSymbol = barChartSymbol as IChartSymbol;
+                }
+                else if (stackedChartSymbol != null)
+                {
+                    chartRenderer.ChartSymbol = stackedChartSymbol as IChartSymbol;
+                }
+                else if (pieChartSymbol != null)
+                {
+                    chartRenderer.ChartSymbol = pieChartSymbol as IChartSymbol;
+                }
+
+                fillSymbol = new SimpleFillSymbolClass();
+                fillSymbol.Color = ColorTool.GetRgbColor(239, 228, 190);
+                // 设置背景符号
+                chartRenderer.BaseSymbol = fillSymbol as ISymbol;
+
+                // 让符号处于图形中央
+                chartRenderer.UseOverposter = false;
+                chartRenderer.CreateLegend();
+                geoFeatureLayer.Renderer = chartRenderer as IFeatureRenderer;
+                MainMapControl.Refresh();
+                TOCControl.Update();
+                mChartEnumTpye = ChartEnumTpye.UnKnow;
+            }
+        }
+
+        #endregion
+
+        #region 5.4.9 双值符号化
+
+        private void Bivariate_Click(object sender, EventArgs e)
+        {
+            if (mFormCurrency2 == null || mFormCurrency2.IsDisposed)
+            {
+                mFormCurrency2 = new FormCurrency2();
+                mFormCurrency2.Render += new FormCurrency2.EventHandler(frmBivariateRenderer_BivariateRenderer);
+            }
+            mFormCurrency2.Map = MainMapControl.Map;
+            mFormCurrency2.FormTitleText = "双值符号化";
+            mFormCurrency2.Show();
+        }
+
+        void frmBivariateRenderer_BivariateRenderer(string sFeatClsName, string sFieldName, int numclasses)
+        {
+            IFeatureLayer pFeatLyr = MapOperation.GetFeatureLayerByName(MainMapControl.Map, sFeatClsName);
+            BivariateRenderer(pFeatLyr, sFieldName, numclasses);
+        }
+        private void BivariateRenderer(IFeatureLayer pFeatLyr, string sFieldName, int numclasses)
+        {
+            IGeoFeatureLayer pGeoFeatLyr = pFeatLyr as IGeoFeatureLayer;
+            ITable pTable = pFeatLyr as ITable;
+            IUniqueValueRenderer pUniqueValueRender = new UniqueValueRendererClass();
+            int intFieldNumber = pTable.FindField(sFieldName);
+            pUniqueValueRender.FieldCount = 1;          //设置唯一值符号化的关键字段为一个
+            pUniqueValueRender.set_Field(0, sFieldName);//设置唯一值符号化的第一个关键字段
+
+            IRandomColorRamp pRandColorRamp = new RandomColorRampClass();
+            pRandColorRamp.StartHue = 0;
+            pRandColorRamp.MinValue = 0;
+            pRandColorRamp.MinSaturation = 15;
+            pRandColorRamp.EndHue = 360;
+            pRandColorRamp.MaxValue = 100;
+            pRandColorRamp.MaxSaturation = 30;
+            //根据渲染字段的值的个数，设置一组随机颜色，如某一字段有5个值，则创建5个随机颜色与之匹配
+            IQueryFilter pQueryFilter = new QueryFilterClass();
+            pRandColorRamp.Size = pFeatLyr.FeatureClass.FeatureCount(pQueryFilter);
+            bool bSuccess = false;
+            pRandColorRamp.CreateRamp(out bSuccess);
+            IEnumColors pEnumRamp = pRandColorRamp.Colors;
+            IColor pNextUniqueColor = null;
+            pQueryFilter = new QueryFilterClass();
+            pQueryFilter.AddField(sFieldName);
+            ICursor pCursor = pTable.Search(pQueryFilter, true);
+            IRow pNextRow = pCursor.NextRow();
+            object codeValue = null;
+            IRowBuffer pNextRowBuffer = null;
+
+
+            while (pNextRow != null)
+            {
+                pNextRowBuffer = pNextRow as IRowBuffer;
+                codeValue = pNextRowBuffer.get_Value(intFieldNumber);//获取渲染字段的每一个值
+
+                pNextUniqueColor = pEnumRamp.Next();
+                if (pNextUniqueColor == null)
+                {
+                    pEnumRamp.Reset();
+                    pNextUniqueColor = pEnumRamp.Next();
+                }
+                IFillSymbol pFillSymbol = null;
+                ILineSymbol pLineSymbol;
+                IMarkerSymbol pMarkerSymbol;
+                switch (pGeoFeatLyr.FeatureClass.ShapeType)
+                {
+                    case esriGeometryType.esriGeometryPolygon:
+                        {
+                            pFillSymbol = new SimpleFillSymbolClass();
+                            pFillSymbol.Color = pNextUniqueColor;
+                            pUniqueValueRender.AddValue(codeValue.ToString(), "", pFillSymbol as ISymbol);//添加渲染字段的值和渲染样式
+                            pNextRow = pCursor.NextRow();
+                            break;
+                        }
+                    case esriGeometryType.esriGeometryPolyline:
+                        {
+                            pLineSymbol = new SimpleLineSymbolClass();
+                            pLineSymbol.Color = pNextUniqueColor;
+                            pUniqueValueRender.AddValue(codeValue.ToString(), "", pLineSymbol as ISymbol);//添加渲染字段的值和渲染样式
+                            pNextRow = pCursor.NextRow();
+                            break;
+                        }
+                    case esriGeometryType.esriGeometryPoint:
+                        {
+                            pMarkerSymbol = new SimpleMarkerSymbolClass();
+                            pMarkerSymbol.Color = pNextUniqueColor;
+                            pUniqueValueRender.AddValue(codeValue.ToString(), "", pMarkerSymbol as ISymbol);//添加渲染字段的值和渲染样式
+                            pNextRow = pCursor.NextRow();
+                            break;
+                        }
+                }
+
+                // 分级渲染  
+                ISimpleMarkerSymbol pSimpleMarkerSymbol = new SimpleMarkerSymbolClass();
+                int IbreakIndex;
+                object dataFrequency;
+                object dataValues;
+                //获得要着色的图层             
+                ITable pTable2 = pGeoFeatLyr.FeatureClass as ITable;
+                ITableHistogram pTableHistogram = new BasicTableHistogramClass();
+                IBasicHistogram pBasicHistogram = (IBasicHistogram)pTableHistogram;
+                pTableHistogram.Field = sFieldName;
+                pTableHistogram.Table = pTable2;
+                pBasicHistogram.GetHistogram(out dataValues, out dataFrequency);//获取渲染字段的值及其出现的频率
+                //分级方法，用于根据获得的值计算得出符合要求的数据           
+                IClassifyGEN pClassify = new EqualIntervalClass();
+                try
+                {
+                    pClassify.Classify(dataValues, dataFrequency, ref numclasses);//根据获取字段的值和出现的频率对其进行等级划分 
+                }
+                catch (Exception ex)
+                {
+                }
+                //返回一个数组
+                double[] Classes = (double[])pClassify.ClassBreaks;
+                int ClassesCount = Classes.GetUpperBound(0);
+
+                ILegendInfo pLegendInfo = new ClassBreaksRendererClass();
+                pLegendInfo.SymbolsAreGraduated = true;
+
+                IClassBreaksRenderer pClassBreakRenderer = pLegendInfo as IClassBreaksRenderer;
+                pClassBreakRenderer.Field = sFieldName;// 设置分级字段
+
+                //设置着色对象的分级数目
+                pClassBreakRenderer.BreakCount = ClassesCount;//设置分级数目   自己改的
+                pClassBreakRenderer.SortClassesAscending = true;//升序排列
+                //需要注意的是分级着色对象中的symbol和break的下标都是从0开始
+                double symbolSizeOrigin = 5.0;
+                if (ClassesCount <= 5)
+                {
+                    symbolSizeOrigin = 12;
+                }
+                if (ClassesCount < 10 && ClassesCount > 5)
+                {
+                    symbolSizeOrigin = 7;
+                }
+                IFillSymbol pBackgroundSymbol = new SimpleFillSymbolClass();
+                for (IbreakIndex = 0; IbreakIndex <= ClassesCount - 1; IbreakIndex++)
+                {
+                    pClassBreakRenderer.set_Break(IbreakIndex, Classes[IbreakIndex + 1]);
+                    pSimpleMarkerSymbol = new SimpleMarkerSymbolClass();
+                    pSimpleMarkerSymbol.Color = ColorTool.GetRgbColor(255, 100, 100);
+                    //当渲染面图层时，需要设置BackgroundSymbol
+                    switch (pFeatLyr.FeatureClass.ShapeType)
+                    {
+                        case esriGeometryType.esriGeometryPolygon:
+                            {
+                                pClassBreakRenderer.BackgroundSymbol = pBackgroundSymbol;
+                                break;
+                            }
+                    }
+
+                    pSimpleMarkerSymbol.Size = symbolSizeOrigin + IbreakIndex * symbolSizeOrigin / 3.0d;
+                    pClassBreakRenderer.set_Symbol(IbreakIndex, (ISymbol)pSimpleMarkerSymbol);
+                }
+
+                IBivariateRenderer bivariateRenderer = new BiUniqueValueRendererClass();
+                bivariateRenderer.MainRenderer = (IFeatureRenderer)pUniqueValueRender;//设置主渲染
+                bivariateRenderer.VariationRenderer = (IFeatureRenderer)pClassBreakRenderer;//设置二元渲染
+                bivariateRenderer.CreateLegend();
+                pGeoFeatLyr.Renderer = (IFeatureRenderer)bivariateRenderer;
+                MainMapControl.ActiveView.Refresh();
+                TOCControl.Update();
+            }
+        }
+
+        #endregion
+
+        #region 5.4.10 多比例尺符号化
+
+        private void ScaleDependent_Click(object sender, EventArgs e)
+        {
+            if (mFormCurrency2 == null || mFormCurrency2.IsDisposed)
+            {
+                mFormCurrency2 = new FormCurrency2();
+                mFormCurrency2.Render += new FormCurrency2.EventHandler(frmScaleDependentRenderer_ScaleDependentRenderer);
+            }
+            mFormCurrency2.Map = MainMapControl.Map;
+            mFormCurrency2.FormTitleText = "多比例尺符号化";
+            mFormCurrency2.Show();
+        }
+
+        void frmScaleDependentRenderer_ScaleDependentRenderer(string sFeatClsName, string sFieldName, int numclasses)
+        {
+            IFeatureLayer pFeatLyr = MapOperation.GetFeatureLayerByName(MainMapControl.Map, sFeatClsName);
+            ScaleDependentRenderer(pFeatLyr, sFieldName, numclasses);
+        }
+        private void ScaleDependentRenderer(IFeatureLayer pFeatLyr, string sFieldName, int numclasses)
+        {
+            IGeoFeatureLayer pGeoFeatLyr = pFeatLyr as IGeoFeatureLayer;
+            ITable pTable = pFeatLyr as ITable;
+            //唯一值渲染
+            IUniqueValueRenderer pUniqueValueRender = new UniqueValueRendererClass();
+            int intFieldNumber = pTable.FindField(sFieldName);
+            pUniqueValueRender.FieldCount = 1;          //设置唯一值符号化的关键字段为一个
+            pUniqueValueRender.set_Field(0, sFieldName);//设置唯一值符号化的第一个关键字段
+
+            IRandomColorRamp pRandColorRamp = new RandomColorRampClass();
+            pRandColorRamp.StartHue = 0;
+            pRandColorRamp.MinValue = 0;
+            pRandColorRamp.MinSaturation = 15;
+            pRandColorRamp.EndHue = 360;
+            pRandColorRamp.MaxValue = 100;
+            pRandColorRamp.MaxSaturation = 30;
+            //根据渲染字段的值的个数，设置一组随机颜色，如某一字段有5个值，则创建5个随机颜色与之匹配
+            IQueryFilter pQueryFilter = new QueryFilterClass();
+            pRandColorRamp.Size = pFeatLyr.FeatureClass.FeatureCount(pQueryFilter);
+            bool bSuccess = false;
+            pRandColorRamp.CreateRamp(out bSuccess);
+
+            IEnumColors pEnumRamp = pRandColorRamp.Colors;
+            IColor pNextUniqueColor = null;
+
+            pQueryFilter = new QueryFilterClass();
+            pQueryFilter.AddField(sFieldName);
+            ICursor pCursor = pTable.Search(pQueryFilter, true);
+            IRow pNextRow = pCursor.NextRow();
+            object codeValue = null;
+            IRowBuffer pNextRowBuffer = null;
+
+
+            while (pNextRow != null)
+            {
+                pNextRowBuffer = pNextRow as IRowBuffer;
+                codeValue = pNextRowBuffer.get_Value(intFieldNumber);//获取渲染字段的每一个值
+
+                pNextUniqueColor = pEnumRamp.Next();
+                if (pNextUniqueColor == null)
+                {
+                    pEnumRamp.Reset();
+                    pNextUniqueColor = pEnumRamp.Next();
+                }
+                IFillSymbol pFillSymbol = null;
+                ILineSymbol pLineSymbol;
+                IMarkerSymbol pMarkerSymbol;
+                switch (pGeoFeatLyr.FeatureClass.ShapeType)
+                {
+                    case esriGeometryType.esriGeometryPolygon:
+                        {
+                            pFillSymbol = new SimpleFillSymbolClass();
+                            pFillSymbol.Color = pNextUniqueColor;
+                            pUniqueValueRender.AddValue(codeValue.ToString(), "", pFillSymbol as ISymbol);//添加渲染字段的值和渲染样式
+                            pNextRow = pCursor.NextRow();
+                            break;
+                        }
+                    case esriGeometryType.esriGeometryPolyline:
+                        {
+                            pLineSymbol = new SimpleLineSymbolClass();
+                            pLineSymbol.Color = pNextUniqueColor;
+                            pUniqueValueRender.AddValue(codeValue.ToString(), "", pLineSymbol as ISymbol);//添加渲染字段的值和渲染样式
+                            pNextRow = pCursor.NextRow();
+                            break;
+                        }
+                    case esriGeometryType.esriGeometryPoint:
+                        {
+                            pMarkerSymbol = new SimpleMarkerSymbolClass();
+                            pMarkerSymbol.Color = pNextUniqueColor;
+                            pUniqueValueRender.AddValue(codeValue.ToString(), "", pMarkerSymbol as ISymbol);//添加渲染字段的值和渲染样式
+                            pNextRow = pCursor.NextRow();
+                            break;
+                        }
+                }
+
+                // 分级渲染
+                ISimpleMarkerSymbol pSimpleMarkerSymbol = new SimpleMarkerSymbolClass();
+                int IbreakIndex;
+                object dataFrequency;
+                object dataValues;
+                //获得要着色的图层             
+                ITable pTable2 = pGeoFeatLyr.FeatureClass as ITable;
+                ITableHistogram pTableHistogram = new BasicTableHistogramClass();
+                IBasicHistogram pBasicHistogram = (IBasicHistogram)pTableHistogram;
+                pTableHistogram.Field = sFieldName;
+                pTableHistogram.Table = pTable2;
+                pBasicHistogram.GetHistogram(out dataValues, out dataFrequency);//获取渲染字段的值及其出现的频率
+                //分级方法，用于根据获得的值计算得出符合要求的数据           
+                IClassifyGEN pClassify = new EqualIntervalClass();
+                try
+                {
+                    pClassify.Classify(dataValues, dataFrequency, ref numclasses);//根据获取字段的值和出现的频率对其进行等级划分 
+                }
+                catch (Exception ex)
+                {
+                }
+                //返回一个数组
+                double[] Classes = (double[])pClassify.ClassBreaks;
+                int ClassesCount = Classes.GetUpperBound(0);
+                ILegendInfo pLegendInfo = new ClassBreaksRendererClass();
+                pLegendInfo.SymbolsAreGraduated = true;
+                IClassBreaksRenderer pClassBreakRenderer = pLegendInfo as IClassBreaksRenderer;
+                pClassBreakRenderer.Field = sFieldName;// 设置分级字段
+                //设置着色对象的分级数目
+                pClassBreakRenderer.BreakCount = ClassesCount;//设置分级数目   自己改的
+                pClassBreakRenderer.SortClassesAscending = true;//升序排列
+                //需要注意的是分级着色对象中的symbol和break的下标都是从0开始
+                double symbolSizeOrigin = 5.0;
+                if (ClassesCount <= 5)
+                {
+                    symbolSizeOrigin = 12;
+                }
+                if (ClassesCount < 10 && ClassesCount > 5)
+                {
+                    symbolSizeOrigin = 7;
+                }
+                IFillSymbol pBackgroundSymbol = new SimpleFillSymbolClass(); //另外添加（这个在分级符号中也得添加）
+                pBackgroundSymbol.Color = ColorTool.GetRgbColor(255, 255, 100);
+                for (IbreakIndex = 0; IbreakIndex <= ClassesCount - 1; IbreakIndex++)
+                {
+                    pClassBreakRenderer.set_Break(IbreakIndex, Classes[IbreakIndex + 1]);
+                    pSimpleMarkerSymbol = new SimpleMarkerSymbolClass();
+                    pSimpleMarkerSymbol.Color = ColorTool.GetRgbColor(255, 100, 100);
+                    pClassBreakRenderer.BackgroundSymbol = pBackgroundSymbol;// 另外添加（这个在分级符号中也得添加）
+                    pSimpleMarkerSymbol.Size = symbolSizeOrigin + IbreakIndex * symbolSizeOrigin / 3.0d;
+                    pClassBreakRenderer.set_Symbol(IbreakIndex, (ISymbol)pSimpleMarkerSymbol);
+                }
+                IScaleDependentRenderer pScaleDependentRenderer = new ScaleDependentRendererClass();
+                pScaleDependentRenderer.AddRenderer(pUniqueValueRender as IFeatureRenderer);
+                pScaleDependentRenderer.AddRenderer(pClassBreakRenderer as IFeatureRenderer);
+                pScaleDependentRenderer.set_Break(0, 20000000);
+                pScaleDependentRenderer.set_Break(1, 40000000);
+                pGeoFeatLyr.Renderer = (IFeatureRenderer)pScaleDependentRenderer;
+                MainMapControl.ActiveView.Refresh();
+                TOCControl.Update();
+            }
         }
 
         #endregion

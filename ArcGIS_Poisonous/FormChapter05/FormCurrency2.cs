@@ -17,6 +17,7 @@ namespace ArcGIS_Poisonous.FormChapter05
     /// 可作用窗口
     /// 1.分级色彩符号化
     /// 2.分级符号化
+    /// 3.点密度符号化
     /// </summary>
     public partial class FormCurrency2 : Form
     {

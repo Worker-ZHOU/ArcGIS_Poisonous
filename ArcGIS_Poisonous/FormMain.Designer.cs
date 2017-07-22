@@ -101,6 +101,10 @@
             this.Graduatedsymbol = new System.Windows.Forms.ToolStripMenuItem();
             this.Proportionalsymbol = new System.Windows.Forms.ToolStripMenuItem();
             this.Dotdensitys = new System.Windows.Forms.ToolStripMenuItem();
+            this.统计图标符号化ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Pie = new System.Windows.Forms.ToolStripMenuItem();
+            this.Bar = new System.Windows.Forms.ToolStripMenuItem();
+            this.Stacked = new System.Windows.Forms.ToolStripMenuItem();
             this.StatusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.SplitContainer = new System.Windows.Forms.SplitContainer();
@@ -122,6 +126,8 @@
             this.btnLayerSel = new System.Windows.Forms.ToolStripMenuItem();
             this.btnLayerUnSel = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolbarControl = new ESRI.ArcGIS.Controls.AxToolbarControl();
+            this.Bivariate = new System.Windows.Forms.ToolStripMenuItem();
+            this.ScaleDependent = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuStrip.SuspendLayout();
             this.StatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
@@ -537,7 +543,10 @@
             this.文本符号化ToolStripMenuItem,
             this.标注ToolStripMenuItem,
             this.类别符号化ToolStripMenuItem,
-            this.定量符号化ToolStripMenuItem});
+            this.定量符号化ToolStripMenuItem,
+            this.统计图标符号化ToolStripMenuItem,
+            this.Bivariate,
+            this.ScaleDependent});
             this.chapter05ToolStripMenuItem.Name = "chapter05ToolStripMenuItem";
             this.chapter05ToolStripMenuItem.Size = new System.Drawing.Size(80, 21);
             this.chapter05ToolStripMenuItem.Text = "Chapter05";
@@ -685,30 +694,61 @@
             // GraduatedColor
             // 
             this.GraduatedColor.Name = "GraduatedColor";
-            this.GraduatedColor.Size = new System.Drawing.Size(152, 22);
+            this.GraduatedColor.Size = new System.Drawing.Size(148, 22);
             this.GraduatedColor.Text = "分级色彩";
             this.GraduatedColor.Click += new System.EventHandler(this.GraduatedColor_Click);
             // 
             // Graduatedsymbol
             // 
             this.Graduatedsymbol.Name = "Graduatedsymbol";
-            this.Graduatedsymbol.Size = new System.Drawing.Size(152, 22);
+            this.Graduatedsymbol.Size = new System.Drawing.Size(148, 22);
             this.Graduatedsymbol.Text = "分级符号化";
             this.Graduatedsymbol.Click += new System.EventHandler(this.Graduatedsymbol_Click);
             // 
             // Proportionalsymbol
             // 
             this.Proportionalsymbol.Name = "Proportionalsymbol";
-            this.Proportionalsymbol.Size = new System.Drawing.Size(152, 22);
+            this.Proportionalsymbol.Size = new System.Drawing.Size(148, 22);
             this.Proportionalsymbol.Text = "比例符号化";
             this.Proportionalsymbol.Click += new System.EventHandler(this.Proportionalsymbol_Click);
             // 
             // Dotdensitys
             // 
             this.Dotdensitys.Name = "Dotdensitys";
-            this.Dotdensitys.Size = new System.Drawing.Size(152, 22);
+            this.Dotdensitys.Size = new System.Drawing.Size(148, 22);
             this.Dotdensitys.Text = "点密度符号化";
             this.Dotdensitys.Click += new System.EventHandler(this.Dotdensitys_Click);
+            // 
+            // 统计图标符号化ToolStripMenuItem
+            // 
+            this.统计图标符号化ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.Pie,
+            this.Bar,
+            this.Stacked});
+            this.统计图标符号化ToolStripMenuItem.Name = "统计图标符号化ToolStripMenuItem";
+            this.统计图标符号化ToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.统计图标符号化ToolStripMenuItem.Text = "统计图标符号化";
+            // 
+            // Pie
+            // 
+            this.Pie.Name = "Pie";
+            this.Pie.Size = new System.Drawing.Size(152, 22);
+            this.Pie.Text = "饼图";
+            this.Pie.Click += new System.EventHandler(this.Pie_Click);
+            // 
+            // Bar
+            // 
+            this.Bar.Name = "Bar";
+            this.Bar.Size = new System.Drawing.Size(152, 22);
+            this.Bar.Text = "条形图";
+            this.Bar.Click += new System.EventHandler(this.Bar_Click);
+            // 
+            // Stacked
+            // 
+            this.Stacked.Name = "Stacked";
+            this.Stacked.Size = new System.Drawing.Size(152, 22);
+            this.Stacked.Text = "堆叠图";
+            this.Stacked.Click += new System.EventHandler(this.Stacked_Click);
             // 
             // StatusStrip
             // 
@@ -918,6 +958,20 @@
             this.ToolbarControl.Size = new System.Drawing.Size(784, 28);
             this.ToolbarControl.TabIndex = 3;
             // 
+            // Bivariate
+            // 
+            this.Bivariate.Name = "Bivariate";
+            this.Bivariate.Size = new System.Drawing.Size(164, 22);
+            this.Bivariate.Text = "双值符号化";
+            this.Bivariate.Click += new System.EventHandler(this.Bivariate_Click);
+            // 
+            // ScaleDependent
+            // 
+            this.ScaleDependent.Name = "ScaleDependent";
+            this.ScaleDependent.Size = new System.Drawing.Size(164, 22);
+            this.ScaleDependent.Text = "多比例尺符号化";
+            this.ScaleDependent.Click += new System.EventHandler(this.ScaleDependent_Click);
+            // 
             // ArcGisPoisonous
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1051,6 +1105,12 @@
         private System.Windows.Forms.ToolStripMenuItem Graduatedsymbol;
         private System.Windows.Forms.ToolStripMenuItem Proportionalsymbol;
         private System.Windows.Forms.ToolStripMenuItem Dotdensitys;
+        private System.Windows.Forms.ToolStripMenuItem 统计图标符号化ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem Pie;
+        private System.Windows.Forms.ToolStripMenuItem Bar;
+        private System.Windows.Forms.ToolStripMenuItem Stacked;
+        private System.Windows.Forms.ToolStripMenuItem Bivariate;
+        private System.Windows.Forms.ToolStripMenuItem ScaleDependent;
     }
 }
 
