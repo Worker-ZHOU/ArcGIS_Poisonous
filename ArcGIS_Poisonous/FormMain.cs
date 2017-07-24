@@ -99,9 +99,9 @@ namespace ArcGIS_Poisonous
             IObjectCopy pObjectCopy = new ObjectCopyClass();
             object copyFromMap = MainMapControl.Map;
             object copiedMap = pObjectCopy.Copy(copyFromMap);//复制地图到copiedMap中
-            object copyToMap = axPageLayoutControl.ActiveView.FocusMap;
+            object copyToMap = MainPageLayoutControl.ActiveView.FocusMap;
             pObjectCopy.Overwrite(copiedMap, ref copyToMap); //复制地图
-            axPageLayoutControl.ActiveView.Refresh();
+            MainPageLayoutControl.ActiveView.Refresh();
         }
 
 
@@ -713,10 +713,10 @@ namespace ArcGIS_Poisonous
         /// <param name="e"></param>
         private void MainMapControl_OnAfterScreenDraw(object sender, IMapControlEvents2_OnAfterScreenDrawEvent e)
         {
-            IActiveView pActiveView = (IActiveView)axPageLayoutControl.ActiveView.FocusMap;
+            IActiveView pActiveView = (IActiveView)MainPageLayoutControl.ActiveView.FocusMap;
             IDisplayTransformation displayTransformation = pActiveView.ScreenDisplay.DisplayTransformation;
             displayTransformation.VisibleBounds = MainMapControl.Extent;
-            axPageLayoutControl.ActiveView.Refresh();
+            MainPageLayoutControl.ActiveView.Refresh();
             CopyToPageLayout();
         }
 
@@ -961,7 +961,9 @@ namespace ArcGIS_Poisonous
 
 
 
+
         #endregion
 
+       
     }
 }

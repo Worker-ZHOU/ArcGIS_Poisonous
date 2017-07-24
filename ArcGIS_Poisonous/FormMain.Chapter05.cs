@@ -49,9 +49,19 @@ namespace ArcGIS_Poisonous
         private FormCurrency3 mFormCurrency3;
 
         /// <summary>
+        ///  地图整饰与输出窗口
+        /// </summary>
+        private FormSymbology mFormSymbology;
+
+        /// <summary>
         /// 统计图表枚举类型
         /// </summary>
         private ChartEnumTpye mChartEnumTpye = ChartEnumTpye.UnKnow;
+
+        /// <summary>
+        /// 添加地图要素类型
+        /// </summary>
+        private EnumMapSurroundType mEnumMapSurroundType = EnumMapSurroundType.None;
 
         #endregion
 
@@ -1666,6 +1676,254 @@ namespace ArcGIS_Poisonous
         }
 
         #endregion
+
+        #endregion
+
+        #region 5.5 地图整饰
+
+        public enum EnumMapSurroundType
+        {
+            None = 0,
+            NorthArrow = 1,
+            ScaleBar = 2,
+            Legend = 3,
+        }
+
+        #region 5.5.1 添加图例
+
+        private void AddLegend_Click(object sender, EventArgs e)
+        {
+            mEnumMapSurroundType = EnumMapSurroundType.Legend;        
+        }
+
+        private void MakeLegend(IActiveView activeView, IPageLayout pageLayout, IEnvelope envelope)
+        {
+            UID id = new UID();
+            id.Value = "esriCarto.Legend";
+            IGraphicsContainer graphicsContainer = pageLayout as IGraphicsContainer;
+            IMapFrame mapFrame = graphicsContainer.FindFrame(activeView.FocusMap) as IMapFrame;
+            // 根据唯一标识符，穿件与之对应的MapSurriundFrame
+            IMapSurroundFrame mapSurroundFrame = mapFrame.CreateSurroundFrame(id, null);
+            // 获取pageLayer中的图例元素
+            IElement deletElement = MainPageLayoutControl.FindElementByName("Legend");
+
+            if (deletElement != null)
+            {
+                // 如果已经存在图例，删除已经存在的图例
+                graphicsContainer.DeleteElement(deletElement);
+            }
+
+            // 设置MapSurroundFrame背景
+            ISymbolBackground symbolBackground = new SymbolBackgroundClass();
+            IFillSymbol fillSymbol = new SimpleFillSymbolClass();
+            ILineSymbol lineSymbol = new SimpleLineSymbolClass();
+            fillSymbol.Color = ColorTool.GetRgbColor(240,240,240);
+            lineSymbol.Color = ColorTool.GetRgbColor(0, 0, 0);
+            fillSymbol.Outline = lineSymbol;
+            symbolBackground.FillSymbol = fillSymbol;
+            mapSurroundFrame.Background = symbolBackground;
+            // 添加图例
+            IElement element = mapSurroundFrame as IElement;
+            element.Geometry = envelope as IGeometry;
+            IMapSurround mapSurround = mapSurroundFrame.MapSurround;
+            ILegend legend = mapSurround as ILegend;
+            legend.ClearItems();
+            legend.Title = "图例";
+            for (int i = 0; i < activeView.FocusMap.LayerCount; i++)
+            {
+                ILegendItem legendItem = new HorizontalLegendItemClass();
+                // 获取添加图例关联图层
+                legendItem.Layer = activeView.FocusMap.get_Layer(i);
+                legendItem.ShowDescriptions = false;
+                legendItem.Columns = 1;
+                legendItem.ShowHeading = true;
+                legendItem.ShowLabels = true;
+                // 添加图例内容
+                legend.AddItem(legendItem);
+            }
+            graphicsContainer.AddElement(element, 0);
+            activeView.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+        }
+
+
+        #endregion
+
+        #region 5.5.2 添加指北针
+
+        private void AddNorthArrows_Click(object sender, EventArgs e)
+        {
+            mEnumMapSurroundType = EnumMapSurroundType.NorthArrow;
+            if (mFormSymbology == null || mFormSymbology.IsDisposed)
+            {
+                mFormSymbology = new FormSymbology();
+                mFormSymbology.Render += new FormSymbology.EventHandler(FormSymbology_GetSelSymbolItem);
+            }
+            mFormSymbology.EnumMapSurType = mEnumMapSurroundType;
+            mFormSymbology.InitUI();
+            mFormSymbology.ShowDialog();
+        }
+
+        /// <summary>
+        /// 插入指北针
+        /// </summary>
+        /// <param name="pageLayout"></param>
+        /// <param name="envelope"></param>
+        /// <param name="activeView"></param>
+        private void addNorthArrow(IPageLayout pageLayout, IEnvelope envelope, IActiveView activeView)
+        {
+            IMap map = activeView.FocusMap;
+            IGraphicsContainer graphicsContainer = pageLayout as IGraphicsContainer;
+            IMapFrame mapFrame = graphicsContainer.FindFrame(map) as IMapFrame;
+            if (mStyleGalleryItem == null)
+            {
+                return;
+            }
+            IMapSurroundFrame mapSurroundFrame = new MapSurroundFrameClass();
+            mapSurroundFrame.MapFrame = mapFrame;
+            INorthArrow northArrow = new MarkerNorthArrowClass();
+            northArrow = mStyleGalleryItem.Item as INorthArrow;
+            northArrow.Size = envelope.Width * 50;
+            // 根据用户的选取，获取相应的MapSurround
+            mapSurroundFrame.MapSurround = northArrow as IMapSurround;
+            // 获取PageLayer中的指北针元素
+            IElement element = MainPageLayoutControl.FindElementByName("NorthArrows");
+            if (element != null)
+            {
+                // 如果存在值北针，删除已经存在的指北针
+                graphicsContainer.DeleteElement(element);
+            }
+            IElementProperties elementProperties = null;
+            element = mapSurroundFrame as IElement;
+            element.Geometry = envelope as IGeometry;
+            elementProperties = element as IElementProperties;
+            elementProperties.Name = "NorthArrows";
+            graphicsContainer.AddElement(element, 0);
+            activeView.PartialRefresh(esriViewDrawPhase.esriViewGraphics,null,null);
+        }
+
+        #endregion
+
+        #region 5.5.3 添加比例尺
+
+        private void AddScaleBar_Click(object sender, EventArgs e)
+        {
+            mEnumMapSurroundType = EnumMapSurroundType.ScaleBar;
+            if (mFormSymbology == null || mFormSymbology.IsDisposed)
+            {
+                mFormSymbology = new FormSymbology();
+                mFormSymbology.Render += new FormSymbology.EventHandler(FormSymbology_GetSelSymbolItem);
+            }
+            mFormSymbology.EnumMapSurType = mEnumMapSurroundType;
+            mFormSymbology.InitUI();
+            mFormSymbology.ShowDialog();
+        }
+
+        private void makeScaleBar(IActiveView activeView, IPageLayout pageLayout, IEnvelope envelope)
+        {
+            IMap map = activeView.FocusMap;
+            IGraphicsContainer graphicsContainer = pageLayout as IGraphicsContainer;
+            IMapFrame mapFrame = graphicsContainer.FindFrame(map) as IMapFrame;
+            if (mStyleGalleryItem == null)
+            {
+                return;
+            }
+            IMapSurroundFrame mapSurroundFrame = new MapSurroundFrameClass();
+            mapSurroundFrame.MapFrame = mapFrame;
+            mapSurroundFrame.MapSurround = mStyleGalleryItem.Item as IMapSurround;
+            IElement element = MainPageLayoutControl.FindElementByName("ScaleBar");
+            if (element != null)
+            {
+                // 删除已经存在的比例尺
+                graphicsContainer.DeleteElement(element);
+            }
+            IElementProperties elementProperties = null;
+            element = mapSurroundFrame as IElement;
+            element.Geometry = envelope as IGeometry;
+            elementProperties = element as IElementProperties;
+            elementProperties.Name = "ScaleBar";
+            graphicsContainer.AddElement(element, 0);
+            activeView.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+        }
+
+        #endregion
+
+        private IPoint mPoint = null;
+
+        private IPoint mMovePoint = null;
+
+        private INewEnvelopeFeedback mNewEnvelopeFeedback = null;
+
+        private void MainPageLayoutControl_OnMouseDown(object sender, IPageLayoutControlEvents_OnMouseDownEvent e)
+        {
+
+            if (mEnumMapSurroundType != EnumMapSurroundType.None)
+            {
+                IActiveView activeView = null;
+                activeView = MainPageLayoutControl.PageLayout as IActiveView;
+                mPoint = activeView.ScreenDisplay.DisplayTransformation.ToMapPoint(e.x, e.y);
+                if (mNewEnvelopeFeedback == null)
+                {
+                    mNewEnvelopeFeedback = new NewEnvelopeFeedbackClass();
+                    mNewEnvelopeFeedback.Display = activeView.ScreenDisplay;
+                    mNewEnvelopeFeedback.Start(mPoint);
+                }
+                else
+                {
+                    mNewEnvelopeFeedback.MoveTo(mPoint);
+                }
+            }
+
+        }
+
+        private void MainPageLayoutControl_OnMouseMove(object sender, IPageLayoutControlEvents_OnMouseMoveEvent e)
+        {
+            if (mEnumMapSurroundType != EnumMapSurroundType.None)
+            {
+                if (mNewEnvelopeFeedback != null)
+                {
+                    mMovePoint = (MainPageLayoutControl.PageLayout as IActiveView).ScreenDisplay.DisplayTransformation.ToMapPoint(e.x, e.y);
+                    mNewEnvelopeFeedback.MoveTo(mMovePoint);
+                }
+            }
+        }
+
+        private void MainPageLayoutControl_OnMouseUp(object sender, IPageLayoutControlEvents_OnMouseUpEvent e)
+        {
+
+            if (mEnumMapSurroundType != EnumMapSurroundType.None)
+            {
+                IActiveView activeView = null;
+                activeView = MainPageLayoutControl.PageLayout as IActiveView;
+                IEnvelope envelope = mNewEnvelopeFeedback.Stop();
+                AddMapSuround(activeView, mEnumMapSurroundType, envelope);
+                mNewEnvelopeFeedback = null;
+                mEnumMapSurroundType = EnumMapSurroundType.None;
+            }
+          
+        }
+
+        private void AddMapSuround(IActiveView activeView, EnumMapSurroundType enumType, IEnvelope envelope) {
+            switch (enumType)
+            {
+
+                case EnumMapSurroundType.NorthArrow:
+                    addNorthArrow(MainPageLayoutControl.PageLayout, envelope, activeView);
+                    break;
+                case EnumMapSurroundType.ScaleBar:
+                    makeScaleBar(activeView, MainPageLayoutControl.PageLayout, envelope);
+                    break;
+                case EnumMapSurroundType.Legend:
+                    MakeLegend(activeView, MainPageLayoutControl.PageLayout, envelope);
+                    break;
+            }
+        }
+        
+        private void FormSymbology_GetSelSymbolItem(ref IStyleGalleryItem pStyleItem)
+        {
+            mStyleGalleryItem = pStyleItem;
+        }
+
+        private IStyleGalleryItem mStyleGalleryItem;
 
         #endregion
 

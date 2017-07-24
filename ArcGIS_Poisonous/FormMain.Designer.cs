@@ -105,6 +105,12 @@
             this.Pie = new System.Windows.Forms.ToolStripMenuItem();
             this.Bar = new System.Windows.Forms.ToolStripMenuItem();
             this.Stacked = new System.Windows.Forms.ToolStripMenuItem();
+            this.Bivariate = new System.Windows.Forms.ToolStripMenuItem();
+            this.ScaleDependent = new System.Windows.Forms.ToolStripMenuItem();
+            this.地图要素ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.AddLegend = new System.Windows.Forms.ToolStripMenuItem();
+            this.AddNorthArrows = new System.Windows.Forms.ToolStripMenuItem();
+            this.AddScaleBar = new System.Windows.Forms.ToolStripMenuItem();
             this.StatusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.SplitContainer = new System.Windows.Forms.SplitContainer();
@@ -116,7 +122,7 @@
             this.LicenseControl = new ESRI.ArcGIS.Controls.AxLicenseControl();
             this.MainMapControl = new ESRI.ArcGIS.Controls.AxMapControl();
             this.TabPageLayoutView = new System.Windows.Forms.TabPage();
-            this.axPageLayoutControl = new ESRI.ArcGIS.Controls.AxPageLayoutControl();
+            this.MainPageLayoutControl = new ESRI.ArcGIS.Controls.AxPageLayoutControl();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.btnAttribute = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -126,8 +132,6 @@
             this.btnLayerSel = new System.Windows.Forms.ToolStripMenuItem();
             this.btnLayerUnSel = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolbarControl = new ESRI.ArcGIS.Controls.AxToolbarControl();
-            this.Bivariate = new System.Windows.Forms.ToolStripMenuItem();
-            this.ScaleDependent = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuStrip.SuspendLayout();
             this.StatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
@@ -145,7 +149,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.LicenseControl)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MainMapControl)).BeginInit();
             this.TabPageLayoutView.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.axPageLayoutControl)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.MainPageLayoutControl)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ToolbarControl)).BeginInit();
             this.SuspendLayout();
@@ -546,7 +550,8 @@
             this.定量符号化ToolStripMenuItem,
             this.统计图标符号化ToolStripMenuItem,
             this.Bivariate,
-            this.ScaleDependent});
+            this.ScaleDependent,
+            this.地图要素ToolStripMenuItem});
             this.chapter05ToolStripMenuItem.Name = "chapter05ToolStripMenuItem";
             this.chapter05ToolStripMenuItem.Size = new System.Drawing.Size(80, 21);
             this.chapter05ToolStripMenuItem.Text = "Chapter05";
@@ -732,23 +737,68 @@
             // Pie
             // 
             this.Pie.Name = "Pie";
-            this.Pie.Size = new System.Drawing.Size(152, 22);
+            this.Pie.Size = new System.Drawing.Size(112, 22);
             this.Pie.Text = "饼图";
             this.Pie.Click += new System.EventHandler(this.Pie_Click);
             // 
             // Bar
             // 
             this.Bar.Name = "Bar";
-            this.Bar.Size = new System.Drawing.Size(152, 22);
+            this.Bar.Size = new System.Drawing.Size(112, 22);
             this.Bar.Text = "条形图";
             this.Bar.Click += new System.EventHandler(this.Bar_Click);
             // 
             // Stacked
             // 
             this.Stacked.Name = "Stacked";
-            this.Stacked.Size = new System.Drawing.Size(152, 22);
+            this.Stacked.Size = new System.Drawing.Size(112, 22);
             this.Stacked.Text = "堆叠图";
             this.Stacked.Click += new System.EventHandler(this.Stacked_Click);
+            // 
+            // Bivariate
+            // 
+            this.Bivariate.Name = "Bivariate";
+            this.Bivariate.Size = new System.Drawing.Size(164, 22);
+            this.Bivariate.Text = "双值符号化";
+            this.Bivariate.Click += new System.EventHandler(this.Bivariate_Click);
+            // 
+            // ScaleDependent
+            // 
+            this.ScaleDependent.Name = "ScaleDependent";
+            this.ScaleDependent.Size = new System.Drawing.Size(164, 22);
+            this.ScaleDependent.Text = "多比例尺符号化";
+            this.ScaleDependent.Click += new System.EventHandler(this.ScaleDependent_Click);
+            // 
+            // 地图要素ToolStripMenuItem
+            // 
+            this.地图要素ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.AddLegend,
+            this.AddNorthArrows,
+            this.AddScaleBar});
+            this.地图要素ToolStripMenuItem.Name = "地图要素ToolStripMenuItem";
+            this.地图要素ToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.地图要素ToolStripMenuItem.Text = "地图要素";
+            // 
+            // AddLegend
+            // 
+            this.AddLegend.Name = "AddLegend";
+            this.AddLegend.Size = new System.Drawing.Size(136, 22);
+            this.AddLegend.Text = "添加图例";
+            this.AddLegend.Click += new System.EventHandler(this.AddLegend_Click);
+            // 
+            // AddNorthArrows
+            // 
+            this.AddNorthArrows.Name = "AddNorthArrows";
+            this.AddNorthArrows.Size = new System.Drawing.Size(136, 22);
+            this.AddNorthArrows.Text = "添加指北针";
+            this.AddNorthArrows.Click += new System.EventHandler(this.AddNorthArrows_Click);
+            // 
+            // AddScaleBar
+            // 
+            this.AddScaleBar.Name = "AddScaleBar";
+            this.AddScaleBar.Size = new System.Drawing.Size(136, 22);
+            this.AddScaleBar.Text = "添加比例尺";
+            this.AddScaleBar.Click += new System.EventHandler(this.AddScaleBar_Click);
             // 
             // StatusStrip
             // 
@@ -874,7 +924,7 @@
             // 
             // TabPageLayoutView
             // 
-            this.TabPageLayoutView.Controls.Add(this.axPageLayoutControl);
+            this.TabPageLayoutView.Controls.Add(this.MainPageLayoutControl);
             this.TabPageLayoutView.Location = new System.Drawing.Point(4, 4);
             this.TabPageLayoutView.Name = "TabPageLayoutView";
             this.TabPageLayoutView.Padding = new System.Windows.Forms.Padding(3);
@@ -883,14 +933,17 @@
             this.TabPageLayoutView.Text = "布局视图";
             this.TabPageLayoutView.UseVisualStyleBackColor = true;
             // 
-            // axPageLayoutControl
+            // MainPageLayoutControl
             // 
-            this.axPageLayoutControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.axPageLayoutControl.Location = new System.Drawing.Point(3, 3);
-            this.axPageLayoutControl.Name = "axPageLayoutControl";
-            this.axPageLayoutControl.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axPageLayoutControl.OcxState")));
-            this.axPageLayoutControl.Size = new System.Drawing.Size(506, 449);
-            this.axPageLayoutControl.TabIndex = 0;
+            this.MainPageLayoutControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.MainPageLayoutControl.Location = new System.Drawing.Point(3, 3);
+            this.MainPageLayoutControl.Name = "MainPageLayoutControl";
+            this.MainPageLayoutControl.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("MainPageLayoutControl.OcxState")));
+            this.MainPageLayoutControl.Size = new System.Drawing.Size(506, 449);
+            this.MainPageLayoutControl.TabIndex = 0;
+            this.MainPageLayoutControl.OnMouseDown += new ESRI.ArcGIS.Controls.IPageLayoutControlEvents_Ax_OnMouseDownEventHandler(this.MainPageLayoutControl_OnMouseDown);
+            this.MainPageLayoutControl.OnMouseUp += new ESRI.ArcGIS.Controls.IPageLayoutControlEvents_Ax_OnMouseUpEventHandler(this.MainPageLayoutControl_OnMouseUp);
+            this.MainPageLayoutControl.OnMouseMove += new ESRI.ArcGIS.Controls.IPageLayoutControlEvents_Ax_OnMouseMoveEventHandler(this.MainPageLayoutControl_OnMouseMove);
             // 
             // contextMenuStrip1
             // 
@@ -958,20 +1011,6 @@
             this.ToolbarControl.Size = new System.Drawing.Size(784, 28);
             this.ToolbarControl.TabIndex = 3;
             // 
-            // Bivariate
-            // 
-            this.Bivariate.Name = "Bivariate";
-            this.Bivariate.Size = new System.Drawing.Size(164, 22);
-            this.Bivariate.Text = "双值符号化";
-            this.Bivariate.Click += new System.EventHandler(this.Bivariate_Click);
-            // 
-            // ScaleDependent
-            // 
-            this.ScaleDependent.Name = "ScaleDependent";
-            this.ScaleDependent.Size = new System.Drawing.Size(164, 22);
-            this.ScaleDependent.Text = "多比例尺符号化";
-            this.ScaleDependent.Click += new System.EventHandler(this.ScaleDependent_Click);
-            // 
             // ArcGisPoisonous
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1003,7 +1042,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.LicenseControl)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.MainMapControl)).EndInit();
             this.TabPageLayoutView.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.axPageLayoutControl)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.MainPageLayoutControl)).EndInit();
             this.contextMenuStrip1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.ToolbarControl)).EndInit();
             this.ResumeLayout(false);
@@ -1065,7 +1104,7 @@
         private System.Windows.Forms.ToolStripMenuItem btnExportRegion;
         private ESRI.ArcGIS.Controls.AxMapControl EagleEyeMapControl;
         private System.Windows.Forms.SplitContainer SplitContainerMenu;
-        private ESRI.ArcGIS.Controls.AxPageLayoutControl axPageLayoutControl;
+        private ESRI.ArcGIS.Controls.AxPageLayoutControl MainPageLayoutControl;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem btnAttribute;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
@@ -1111,6 +1150,10 @@
         private System.Windows.Forms.ToolStripMenuItem Stacked;
         private System.Windows.Forms.ToolStripMenuItem Bivariate;
         private System.Windows.Forms.ToolStripMenuItem ScaleDependent;
+        private System.Windows.Forms.ToolStripMenuItem 地图要素ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem AddLegend;
+        private System.Windows.Forms.ToolStripMenuItem AddNorthArrows;
+        private System.Windows.Forms.ToolStripMenuItem AddScaleBar;
     }
 }
 
