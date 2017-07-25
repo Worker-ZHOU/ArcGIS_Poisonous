@@ -111,6 +111,12 @@
             this.AddLegend = new System.Windows.Forms.ToolStripMenuItem();
             this.AddNorthArrows = new System.Windows.Forms.ToolStripMenuItem();
             this.AddScaleBar = new System.Windows.Forms.ToolStripMenuItem();
+            this.地图网格 = new System.Windows.Forms.ToolStripMenuItem();
+            this.AddGraticule = new System.Windows.Forms.ToolStripMenuItem();
+            this.AddMeasuredGrid = new System.Windows.Forms.ToolStripMenuItem();
+            this.AddIndexGrid = new System.Windows.Forms.ToolStripMenuItem();
+            this.DelectGird = new System.Windows.Forms.ToolStripMenuItem();
+            this.SelectTemplate = new System.Windows.Forms.ToolStripMenuItem();
             this.StatusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.SplitContainer = new System.Windows.Forms.SplitContainer();
@@ -132,6 +138,7 @@
             this.btnLayerSel = new System.Windows.Forms.ToolStripMenuItem();
             this.btnLayerUnSel = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolbarControl = new ESRI.ArcGIS.Controls.AxToolbarControl();
+            this.Print = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuStrip.SuspendLayout();
             this.StatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
@@ -551,7 +558,10 @@
             this.统计图标符号化ToolStripMenuItem,
             this.Bivariate,
             this.ScaleDependent,
-            this.地图要素ToolStripMenuItem});
+            this.地图要素ToolStripMenuItem,
+            this.地图网格,
+            this.SelectTemplate,
+            this.Print});
             this.chapter05ToolStripMenuItem.Name = "chapter05ToolStripMenuItem";
             this.chapter05ToolStripMenuItem.Size = new System.Drawing.Size(80, 21);
             this.chapter05ToolStripMenuItem.Text = "Chapter05";
@@ -800,6 +810,52 @@
             this.AddScaleBar.Text = "添加比例尺";
             this.AddScaleBar.Click += new System.EventHandler(this.AddScaleBar_Click);
             // 
+            // 地图网格
+            // 
+            this.地图网格.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.AddGraticule,
+            this.AddMeasuredGrid,
+            this.AddIndexGrid,
+            this.DelectGird});
+            this.地图网格.Name = "地图网格";
+            this.地图网格.Size = new System.Drawing.Size(164, 22);
+            this.地图网格.Text = "地图格网";
+            // 
+            // AddGraticule
+            // 
+            this.AddGraticule.Name = "AddGraticule";
+            this.AddGraticule.Size = new System.Drawing.Size(184, 22);
+            this.AddGraticule.Text = "Graticule格网";
+            this.AddGraticule.Click += new System.EventHandler(this.AddGraticule_Click);
+            // 
+            // AddMeasuredGrid
+            // 
+            this.AddMeasuredGrid.Name = "AddMeasuredGrid";
+            this.AddMeasuredGrid.Size = new System.Drawing.Size(184, 22);
+            this.AddMeasuredGrid.Text = "MeasuredGrid格网";
+            this.AddMeasuredGrid.Click += new System.EventHandler(this.AddMeasuredGrid_Click);
+            // 
+            // AddIndexGrid
+            // 
+            this.AddIndexGrid.Name = "AddIndexGrid";
+            this.AddIndexGrid.Size = new System.Drawing.Size(184, 22);
+            this.AddIndexGrid.Text = "IndexGrid格网";
+            this.AddIndexGrid.Click += new System.EventHandler(this.AddIndexGrid_Click);
+            // 
+            // DelectGird
+            // 
+            this.DelectGird.Name = "DelectGird";
+            this.DelectGird.Size = new System.Drawing.Size(184, 22);
+            this.DelectGird.Text = "删除格网";
+            this.DelectGird.Click += new System.EventHandler(this.DeleteGird_Click);
+            // 
+            // SelectTemplate
+            // 
+            this.SelectTemplate.Name = "SelectTemplate";
+            this.SelectTemplate.Size = new System.Drawing.Size(164, 22);
+            this.SelectTemplate.Text = "制图模板";
+            this.SelectTemplate.Click += new System.EventHandler(this.SelectTemplate_Click);
+            // 
             // StatusStrip
             // 
             this.StatusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1011,6 +1067,13 @@
             this.ToolbarControl.Size = new System.Drawing.Size(784, 28);
             this.ToolbarControl.TabIndex = 3;
             // 
+            // Print
+            // 
+            this.Print.Name = "Print";
+            this.Print.Size = new System.Drawing.Size(164, 22);
+            this.Print.Text = "打印";
+            this.Print.Click += new System.EventHandler(this.Print_Click);
+            // 
             // ArcGisPoisonous
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1154,6 +1217,13 @@
         private System.Windows.Forms.ToolStripMenuItem AddLegend;
         private System.Windows.Forms.ToolStripMenuItem AddNorthArrows;
         private System.Windows.Forms.ToolStripMenuItem AddScaleBar;
+        private System.Windows.Forms.ToolStripMenuItem 地图网格;
+        private System.Windows.Forms.ToolStripMenuItem AddGraticule;
+        private System.Windows.Forms.ToolStripMenuItem AddMeasuredGrid;
+        private System.Windows.Forms.ToolStripMenuItem AddIndexGrid;
+        private System.Windows.Forms.ToolStripMenuItem DelectGird;
+        private System.Windows.Forms.ToolStripMenuItem SelectTemplate;
+        private System.Windows.Forms.ToolStripMenuItem Print;
     }
 }
 

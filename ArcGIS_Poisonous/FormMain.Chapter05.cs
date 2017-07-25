@@ -1,17 +1,15 @@
-﻿using System;
-using System.Windows.Forms;
-
+﻿using ArcGIS_Poisonous.FormChapter05;
+using ArcGIS_Poisonous.Tools;
 using ESRI.ArcGIS.Carto;
-using ESRI.ArcGIS.Display;
 using ESRI.ArcGIS.Controls;
+using ESRI.ArcGIS.Display;
+using ESRI.ArcGIS.esriSystem;
+using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
 using stdole;
-using ESRI.ArcGIS.Geodatabase;
-using ArcGIS_Poisonous.Tools;
-
-using ArcGIS_Poisonous.FormChapter05;
-using ESRI.ArcGIS.esriSystem;
+using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace ArcGIS_Poisonous
 {
@@ -1681,6 +1679,8 @@ namespace ArcGIS_Poisonous
 
         #region 5.5 地图整饰
 
+        #region 5.5.1 ~ 5.5.3 地图要素
+
         public enum EnumMapSurroundType
         {
             None = 0,
@@ -1917,13 +1917,290 @@ namespace ArcGIS_Poisonous
                     break;
             }
         }
-        
+
+        private IStyleGalleryItem mStyleGalleryItem;
+
         private void FormSymbology_GetSelSymbolItem(ref IStyleGalleryItem pStyleItem)
         {
             mStyleGalleryItem = pStyleItem;
         }
 
-        private IStyleGalleryItem mStyleGalleryItem;
+        #endregion
+
+        #region 5.5.4 添加地图网格
+
+        #region Graticule网格
+
+        private void AddGraticule_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                IActiveView activeView = MainPageLayoutControl.ActiveView;
+                IPageLayout pageLayout = MainPageLayoutControl.PageLayout;
+                DeleteMapGrid(activeView, pageLayout);
+                CreateGraticuleMapGrid(activeView, pageLayout);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void CreateGraticuleMapGrid(IActiveView activeView, IPageLayout pageLayout)
+        {
+            IMap map = activeView.FocusMap;
+            // 看这个改动是否争取
+            IGraticule graticule = new GraticuleClass();
+            graticule.Name = "Map Grid";
+
+            // 设置格网线的符号样式
+            ICartographicLineSymbol cartographicLineSymbol = new CartographicLineSymbolClass();
+            cartographicLineSymbol.Cap = esriLineCapStyle.esriLCSButt;
+            cartographicLineSymbol.Width = 1;
+            cartographicLineSymbol.Color = ColorTool.GetRgbColor(166,187,208);
+            graticule.LineSymbol = cartographicLineSymbol;
+
+            // 设置格网的边框样式
+            ISimpleMapGridBorder simpleMapGridBorder = new SimpleMapGridBorderClass();
+            ISimpleLineSymbol simpleLineSymbol = new SimpleLineSymbolClass();
+            simpleLineSymbol.Style = esriSimpleLineStyle.esriSLSSolid;
+            simpleLineSymbol.Color = ColorTool.GetRgbColor(100,255,0);
+            simpleLineSymbol.Width = 2;
+            simpleMapGridBorder.LineSymbol = simpleLineSymbol as ILineSymbol;
+            graticule.Border = simpleMapGridBorder as IMapGridBorder;
+            graticule.SetTickVisibility(true,true,true,true);
+
+            // 设置格网的主刻度的样式和可见性
+            graticule.TickLength = 15;
+            cartographicLineSymbol = new CartographicLineSymbolClass();
+            cartographicLineSymbol.Cap = esriLineCapStyle.esriLCSButt;
+            cartographicLineSymbol.Width = 1;
+            cartographicLineSymbol.Color = ColorTool.GetRgbColor(166,187,208);
+            graticule.TickMarkSymbol = null;
+            graticule.TickLineSymbol = simpleLineSymbol;
+            graticule.SetTickVisibility(true, true, true, true);
+
+            // 设置格网的次级刻度的样式和可见性
+            graticule.SubTickCount = 5;
+            graticule.SubTickLength = 10;
+            cartographicLineSymbol = new CartographicLineSymbolClass();
+            cartographicLineSymbol.Cap = esriLineCapStyle.esriLCSButt;
+            cartographicLineSymbol.Width = 0.1;
+            cartographicLineSymbol.Color = ColorTool.GetRgbColor(166, 187, 208);
+            graticule.SubTickLineSymbol = cartographicLineSymbol;
+            graticule.SetSubTickVisibility(true, true, true, true);
+
+            // 设置格网标签的样式和可见性
+            IGridLabel gridlabel = graticule.LabelFormat;
+            gridlabel.LabelOffset = 15;
+            StdFont font = new StdFont();
+            font.Name = "Arial";
+            font.Size = 16;
+            graticule.LabelFormat.Font = font as IFontDisp;
+            graticule.Visible = true;
+
+            // 创建IMeasuredGrid对象
+            IMeasuredGrid measuredGrid = new MeasuredGridClass();
+            IProjectedGrid projectedGrid = measuredGrid as IProjectedGrid;
+            projectedGrid.SpatialReference = map.SpatialReference;
+            measuredGrid = graticule as IMeasuredGrid;
+
+            // 获取坐标范围，设置格网的起始点和间隔
+            double maxX, maxY, minX, minY;
+            projectedGrid.SpatialReference.GetDomain(out minX, out maxX, out minY, out maxY);
+            measuredGrid.FixedOrigin = true;
+            measuredGrid.Units = map.MapUnits;
+
+            // 维度范围
+            measuredGrid.XIntervalSize = (maxX - minX) / 200;
+            measuredGrid.XOrigin = minX;
+            // 经度范围
+            measuredGrid.YIntervalSize = (maxY - minY) / 200;
+            measuredGrid.YOrigin = minY;
+
+            // 将格网对象添加到地图控件中
+            IGraphicsContainer graphicsContainer = activeView as IGraphicsContainer;
+            IMapFrame mapFrame = graphicsContainer.FindFrame(map) as IMapFrame;
+            IMapGrids mapGrid = mapFrame as IMapGrids;
+            mapGrid.AddMapGrid(graticule);
+            activeView.PartialRefresh(esriViewDrawPhase.esriViewBackground, null, null);
+        }
+
+
+        #endregion
+
+        #region MeasuredGrid格网
+
+        private void AddMeasuredGrid_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                IActiveView activeView = MainPageLayoutControl.ActiveView;
+                IPageLayout pageLayout = MainPageLayoutControl.PageLayout;
+                DeleteMapGrid(activeView, pageLayout);
+                CreateMeasuredGrid(activeView, pageLayout);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void CreateMeasuredGrid(IActiveView activeView, IPageLayout pageLayout)
+        {
+            IMap map = activeView.FocusMap;
+            IMeasuredGrid measuredGrid = new MeasuredGridClass();
+            // 设置格网的基本属性
+            measuredGrid.FixedOrigin = false;
+            measuredGrid.Units = map.MapUnits;
+            // 设置维度的间隔
+            measuredGrid.XIntervalSize = 5;
+            // 设置经度的间隔
+            measuredGrid.YIntervalSize = 5;
+
+            // 设置GridLabel格式
+            IGridLabel gridLabel = new FormattedGridLabelClass();
+            IFormattedGridLabel formattedGridLabel = new FormattedGridLabelClass();
+            INumericFormat numericFormat = new NumericFormatClass();
+            numericFormat.AlignmentOption = esriNumericAlignmentEnum.esriAlignLeft;
+            numericFormat.RoundingOption = esriRoundingOptionEnum.esriRoundNumberOfDecimals;
+            numericFormat.RoundingValue = 0;
+            numericFormat.ZeroPad = true;
+            formattedGridLabel.Format = numericFormat as INumberFormat;
+            gridLabel = formattedGridLabel as IGridLabel;
+            StdFont font = new StdFontClass();
+            font.Name = "宋体";
+            font.Size = 25;
+            gridLabel.Font = font as IFontDisp;
+            IMapGrid mapGrid = new MeasuredGridClass();
+            mapGrid = measuredGrid as IMapGrid;
+            mapGrid.LabelFormat = gridLabel;
+
+            // 将格网添加到地图上
+            IGraphicsContainer graphicsContainer = pageLayout as IGraphicsContainer;
+            IFrameElement frameElement = graphicsContainer.FindFrame(map);
+            IMapFrame mapFrame = frameElement as IMapFrame;
+            IMapGrids mapGrids = null;
+            mapGrids = mapFrame as IMapGrids;
+            mapGrids.AddMapGrid(mapGrid);
+            activeView.PartialRefresh(esriViewDrawPhase.esriViewBackground, null, null); 
+        }
+
+        #endregion
+
+        #region IndexGrid格网
+
+        private void AddIndexGrid_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                IActiveView activeView = MainPageLayoutControl.ActiveView;
+                IPageLayout pageLayout = MainPageLayoutControl.PageLayout;
+                DeleteMapGrid(activeView, pageLayout);
+                CreateIndexGrid(activeView, pageLayout);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void CreateIndexGrid(IActiveView activeView, IPageLayout pageLayout)
+        {
+            IndexGrid indexGrid = new IndexGridClass();
+
+            // 设置Index属性
+            indexGrid.ColumnCount = 5;
+            indexGrid.RowCount = 5;
+            string[] indexnum = { "A", "B", "C", "D", "F" };
+            // 设置IndexLabel
+            int i = 0;
+            for (i = 0; i < indexGrid.ColumnCount; i++)
+            {
+                indexGrid.set_XLabel(i, indexnum[i]);
+                indexGrid.set_YLabel(i, i.ToString());
+            }
+
+            // 设置GridLabel格式
+            IGridLabel gridLabel = new RoundedTabStyleClass();
+            StdFont font = new StdFontClass();
+            font.Name = "宋体";
+            font.Size = 18;
+            gridLabel.Font = font as IFontDisp;
+            IMapGrid mapGrid = new IndexGridClass();
+            mapGrid = indexGrid as IMapGrid;
+            mapGrid.LabelFormat = gridLabel;
+
+            // 添加IndexGrid
+            IMapGrid mapGird = indexGrid;
+            IMap map = activeView.FocusMap;
+            IGraphicsContainer graphicsContainer = pageLayout as IGraphicsContainer;
+            IFrameElement frameElement = graphicsContainer.FindFrame(map);
+            IMapFrame mapFrame = frameElement as IMapFrame;
+            IMapGrids mapGrids = mapFrame as IMapGrids;
+            mapGrids.AddMapGrid(mapGrid);
+            MainPageLayoutControl.Refresh();
+        }
+
+        #endregion
+
+
+        private void DeleteGird_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                IActiveView activeView = MainPageLayoutControl.ActiveView;
+                IPageLayout pageLayout = MainPageLayoutControl.PageLayout;
+                DeleteMapGrid(activeView, pageLayout);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 删除已经存在的格网
+        /// </summary>
+        /// <param name="activeView"></param>
+        /// <param name="pageLayout"></param>
+        private void DeleteMapGrid(IActiveView activeView, IPageLayout pageLayout)
+        {
+            IMap map = activeView.FocusMap;
+            IGraphicsContainer graphicsContainer = pageLayout as IGraphicsContainer;
+            IFrameElement frameElement = graphicsContainer.FindFrame(map);
+            IMapFrame mapFrame = frameElement as IMapFrame;
+            IMapGrids mapGrids = null;
+            mapGrids = mapFrame as IMapGrids;
+            if (mapGrids.MapGridCount > 0)
+            {
+                IMapGrid mapGrid = mapGrids.get_MapGrid(0);
+                mapGrids.DeleteMapGrid(mapGrid);
+            }
+            activeView.PartialRefresh(esriViewDrawPhase.esriViewBackground, null, null);
+        }
+
+        #endregion
+
+        #endregion
+
+        #region 5.6 制图模板
+
+        private void SelectTemplate_Click(object sender, EventArgs e)
+        {
+            FormTemplate formTemplate = new FormTemplate(MainPageLayoutControl);
+            formTemplate.Show();
+        }
+
+        #endregion
+
+        #region 5.8 打印输出
+
+        private void Print_Click(object sender, EventArgs e)
+        {
+            FormPrintPreview formPrintPreview = new FormPrintPreview(MainPageLayoutControl);
+            formPrintPreview.Show();
+        }
 
         #endregion
 

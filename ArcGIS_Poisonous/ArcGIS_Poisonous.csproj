@@ -139,6 +139,12 @@
     <Compile Include="FormChapter05\FormCurrency3.Designer.cs">
       <DependentUpon>FormCurrency3.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormChapter05\FormPrintPreview.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormChapter05\FormPrintPreview.Designer.cs">
+      <DependentUpon>FormPrintPreview.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormChapter05\FormSingleRender.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -156,6 +162,12 @@
     </Compile>
     <Compile Include="FormChapter05\FormSymbology.Designer.cs">
       <DependentUpon>FormSymbology.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormChapter05\FormTemplate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormChapter05\FormTemplate.Designer.cs">
+      <DependentUpon>FormTemplate.cs</DependentUpon>
     </Compile>
     <Compile Include="Tools\ColorTool.cs" />
     <Compile Include="FormChapter04\FormOptions.cs">
@@ -283,11 +295,17 @@
     <EmbeddedResource Include="FormChapter05\FormCurrency3.resx">
       <DependentUpon>FormCurrency3.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FormChapter05\FormPrintPreview.resx">
+      <DependentUpon>FormPrintPreview.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormChapter05\FormSymbology.resx">
       <DependentUpon>FormSymbology.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormChapter05\FormSymbolSelector.resx">
       <DependentUpon>FormSymbolSelector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormChapter05\FormTemplate.resx">
+      <DependentUpon>FormTemplate.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormChapter05\FormUniqueManyValueRenderer.resx">
       <DependentUpon>FormUniqueManyValueRenderer.cs</DependentUpon>
