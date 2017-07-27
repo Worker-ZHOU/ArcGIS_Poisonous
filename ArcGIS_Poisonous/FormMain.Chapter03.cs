@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using ESRI.ArcGIS.Carto;
-using ESRI.ArcGIS.SystemUI;
+﻿using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.Controls;
-using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.DataSourcesFile;
-using ESRI.ArcGIS.DataSourcesRaster;
 using ESRI.ArcGIS.DataSourcesGDB;
+using ESRI.ArcGIS.DataSourcesRaster;
+using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
-using ESRI.ArcGIS.Display;
-using ESRI.ArcGIS.esriSystem;
+using ESRI.ArcGIS.SystemUI;
+using System;
 using System.Windows.Forms;
 
 namespace ArcGIS_Poisonous

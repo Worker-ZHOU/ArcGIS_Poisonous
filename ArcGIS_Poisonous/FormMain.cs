@@ -8,6 +8,7 @@ using ESRI.ArcGIS.DataSourcesRaster;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
 using ESRI.ArcGIS.esriSystem;
+using ESRI.ArcGIS.SystemUI;
 
 namespace ArcGIS_Poisonous
 {
@@ -72,6 +73,8 @@ namespace ArcGIS_Poisonous
 
         partial void TxtSymbol(IMapControlEvents2_OnMouseDownEvent e);
 
+        partial void ChangeButtonState(bool enable);
+
         #endregion
 
         public ArcGisPoisonous()
@@ -85,6 +88,9 @@ namespace ArcGIS_Poisonous
 
             //窗体初始化时新建ISelectionEnvironment接口的对象，对象具有默认的选项设置值
             selectionEnvironment = new SelectionEnvironmentClass();
+
+            // 修改按钮状态
+            ChangeButtonState(false);
         }
 
         #region Method From Book
@@ -955,6 +961,8 @@ namespace ArcGIS_Poisonous
             //显示选择操作选项窗体
             formOptions.Show();
         }
+
+
 
 
 
